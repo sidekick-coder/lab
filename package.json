@@ -1,0 +1,28 @@
+{
+  "name": "@sidekick-coder/lab",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "lint": "eslint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@sidekick-coder/eslint-config": "^1.0.1",
+    "@types/node": "^22.10.10",
+    "date-fns": "^4.1.0",
+    "eslint": "^9.19.0",
+    "minimist": "^1.2.8",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.5",
+    "eslint-plugin-import": "^2.31.0"
+  }
+}
