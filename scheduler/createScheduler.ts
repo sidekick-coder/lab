@@ -1,20 +1,37 @@
-import type { Routine, SchedulerConfig } from './types.ts'
+import type { Routine, Scheduler, SchedulerConfig } from './types.ts'
 import { importAll } from '../utils/importAll.ts'
 import { filesystem } from '../utils/filesystem.ts'
 import { date } from '../utils/date.ts'
 
-export function createScheduler(config: SchedulerConfig) {
+export function createScheduler(config: SchedulerConfig): Scheduler {
     const routines: Routine[] = []
-    const logger = config.logger
+    const logger = config.logger.child({ module: 'scheduler' })
+    const debug = config.debug || false
+
+    const dirs = config.dirs ? [...config.dirs] : []
+
+    function addDir(dir: string) {
+        dirs.push(dir)
+
+        if (debug) {
+            logger.debug(`adding dir: ${dir}`)
+        }
+    }
 
     function add(routine: Routine) {
         routines.push(routine)
+
+        if (debug) {
+            logger.debug(`adding routine: ${routine.name}`, {
+                routine,
+            })
+        }
     }
 
     async function findRouties() {
         const result = [] as Routine[]
 
-        for await (const dir of config.dirs) {
+        for await (const dir of dirs) {
             const modules = await importAll(dir)
 
             Object.entries(modules).forEach(([key, m]: any) => {
@@ -75,10 +92,12 @@ export function createScheduler(config: SchedulerConfig) {
 
         const start = date.now()
 
-        logger.debug(`routine start: ${name}`, {
-            options,
-            date: start,
-        })
+        if (debug) {
+            logger.debug(`routine start: ${name}`, {
+                options,
+                date: start,
+            })
+        }
 
         const result = routine.execute({
             logger: config.logger,
@@ -89,13 +108,15 @@ export function createScheduler(config: SchedulerConfig) {
 
         await save()
 
-        logger.debug(`routine end: ${name}`, {
-            result,
-            start_date: start,
-            end_date: date.now(),
-            next_run: routine.next_run,
-            duration: date.diff(start, date.now()),
-        })
+        if (debug) {
+            logger.debug(`routine end: ${name}`, {
+                result,
+                start_date: start,
+                end_date: date.now(),
+                next_run: routine.next_run,
+                duration: date.diff(start, date.now()),
+            })
+        }
 
         return result
     }
@@ -110,12 +131,15 @@ export function createScheduler(config: SchedulerConfig) {
         }
     }
 
-    async function start(pooling = 16) {
+    // run
+    let interval: NodeJS.Timeout | undefined
+
+    async function start() {
         await runAll()
 
         let running = false
 
-        const interval = setInterval(async () => {
+        interval = setInterval(async () => {
             if (running) {
                 return
             }
@@ -125,18 +149,30 @@ export function createScheduler(config: SchedulerConfig) {
             await runAll()
 
             running = false
-        }, pooling)
+        }, 16)
 
-        return () => {
-            clearInterval(interval)
+        logger.info('scheduler started', {
+            routines,
+        })
+    }
+
+    async function stop() {
+        if (!interval) {
+            return
         }
+
+        clearInterval(interval)
+
+        interval = undefined
     }
 
     return {
         routines,
         start,
+        stop,
         load,
         add,
+        addDir,
         run,
     }
 }

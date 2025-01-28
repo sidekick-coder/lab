@@ -1,9 +1,8 @@
 ## TODO
 
 - [x] createCommander
-- [ ] createScheduler
+- [x] createScheduler
 - [ ] createCache
 - [ ] createFetcher
-- [ ] createRCloneScheduler()
-- [ ] createRSync()
-- [ ] createRSyncScheduler()
+- [x] createRClonePlugin()
+- [ ] createRSyncPlugin()

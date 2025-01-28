@@ -1,5 +1,6 @@
 import winston from 'winston'
 import chalk from 'chalk'
+import { printObject } from '../utils/index.ts'
 
 const { format } = winston
 const { combine } = winston.format
@@ -41,8 +42,8 @@ export function createConsoleTransport() {
                     result += `\n${stack}`
                 }
 
-                for (const [key, value] of Object.entries(rest)) {
-                    result += chalk.gray(`\n[${key}]: ${JSON.stringify(value)}`)
+                if (Object.keys(rest).length > 0) {
+                    result += '\n' + chalk.gray(printObject(rest))
                 }
 
                 return result

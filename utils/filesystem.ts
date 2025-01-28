@@ -1,5 +1,7 @@
 import fs from 'fs'
 import { tryCatch } from './tryCatch.ts'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 const locks = new Set<string>()
 
@@ -50,6 +52,30 @@ readFile.json = async function (path: string, defaultValue: any = null) {
     return JSON.parse(content)
 }
 
+export async function readDir(path: string, options?: any) {
+    const [files, error] = await tryCatch(() =>
+        fs.promises.readdir(path, {
+            withFileTypes: true,
+        })
+    )
+
+    if (error) {
+        return []
+    }
+
+    let result = files
+
+    if (options?.onlyFiles) {
+        result = files.filter((file) => file.isFile())
+    }
+
+    if (options?.onlyDirectories) {
+        result = files.filter((file) => file.isDirectory())
+    }
+
+    return result.map((file) => file.name)
+}
+
 export async function writeFile(path: string, content: string) {
     if (locks.has(path)) {
         await awaitLock(path)
@@ -74,18 +100,16 @@ writeFile.json = async function (path: string, content: any) {
     }
 }
 
-export async function lock(path: string) {
-    const [, error] = await tryCatch(() => fs.promises.open(path, 'wx'))
+export function resolve(url: string, ...args: string[]) {
+    const __dirname = path.dirname(fileURLToPath(url))
 
-    if (error) {
-        return false
-    }
-
-    return true
+    return path.resolve(__dirname, ...args)
 }
 
 export const filesystem = {
     exists: fileExists,
     read: readFile,
+    readdir: readDir,
     write: writeFile,
+    resolve: resolve,
 }

@@ -20,4 +20,16 @@ export interface SchedulerConfig {
     dirs: string[]
     logger: Logger
     schedule_filename: string
+    context: Record<string, any>
+    debug?: boolean
+}
+
+export interface Scheduler {
+    routines: Routine[]
+    load(): Promise<void>
+    add(routine: RoutineDefinition): void
+    addDir(dir: string): void
+    run(name: string, options: Record<string, any>): Promise<any>
+    start(): Promise<void>
+    stop(): Promise<void>
 }
