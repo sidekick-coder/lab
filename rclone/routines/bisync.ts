@@ -18,6 +18,6 @@ export default defineRoutine({
             return
         }
 
-        //return rclone.withConfig(configs, 'bisync', options)
+        return rclone.withConfig(configs, 'bisync', options)
     },
 })

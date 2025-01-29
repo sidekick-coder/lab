@@ -5,49 +5,51 @@ import { printObject } from '../utils/index.ts'
 const { format } = winston
 const { combine } = winston.format
 
+export const formatPretty = combine(
+    format.colorize({
+        colors: {
+            info: 'cyan',
+            error: 'red',
+            warn: 'yellow',
+            debug: 'blue',
+        },
+    }),
+    format.timestamp({
+        format: 'YYYY-MM-DD HH:mm:ss',
+    }),
+    format.printf((data) => {
+        const { level, message, timestamp, label, module, command, stack, ...rest } = data
+
+        let result = `${timestamp} ${level}`
+
+        if (label) {
+            result += ` ${label}`
+        }
+
+        if (command) {
+            result += chalk.redBright(` [${command}]`)
+        }
+
+        if (module) {
+            result += chalk.yellow(` [${module}]`)
+        }
+
+        result += `: ${message}`
+
+        if (stack) {
+            result += `\n${stack}`
+        }
+
+        if (Object.keys(rest).length > 0) {
+            result += '\n' + chalk.gray(printObject(rest))
+        }
+
+        return result
+    })
+)
+
 export function createConsoleTransport() {
     return new winston.transports.Console({
-        format: combine(
-            format.colorize({
-                colors: {
-                    info: 'cyan',
-                    error: 'red',
-                    warn: 'yellow',
-                    debug: 'blue',
-                },
-            }),
-            format.timestamp({
-                format: 'YYYY-MM-DD HH:mm:ss',
-            }),
-            format.printf((data) => {
-                const { level, message, timestamp, label, module, command, stack, ...rest } = data
-
-                let result = `${timestamp} ${level}`
-
-                if (label) {
-                    result += ` ${label}`
-                }
-
-                if (command) {
-                    result += chalk.redBright(` [${command}]`)
-                }
-
-                if (module) {
-                    result += chalk.yellow(` [${module}]`)
-                }
-
-                result += `: ${message}`
-
-                if (stack) {
-                    result += `\n${stack}`
-                }
-
-                if (Object.keys(rest).length > 0) {
-                    result += '\n' + chalk.gray(printObject(rest))
-                }
-
-                return result
-            })
-        ),
+        format: formatPretty,
     })
 }

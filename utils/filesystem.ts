@@ -57,6 +57,36 @@ readFile.json = async function (path: string, defaultValue: any = null) {
     return JSON.parse(content)
 }
 
+export function readFileSync(path: string) {
+    const [content, error] = tryCatch.sync(() => fs.readFileSync(path))
+
+    if (error) {
+        return null
+    }
+
+    return new Uint8Array(content)
+}
+
+readFileSync.text = function (filepath: string, defaultValue: string = '') {
+    const content = readFileSync(filepath)
+
+    if (!content) {
+        return defaultValue
+    }
+
+    return new TextDecoder().decode(content)
+}
+
+readFileSync.json = function (path: string, defaultValue: any = null) {
+    const content = readFileSync.text(path)
+
+    if (!content) {
+        return defaultValue
+    }
+
+    return JSON.parse(content)
+}
+
 export async function readDir(path: string, options?: any) {
     const [files, error] = await tryCatch(() =>
         fs.promises.readdir(path, {
@@ -123,6 +153,24 @@ writeFile.json = async function (filename: string, content: any, options?: any) 
     await writeFile.text(filename, JSON.stringify(content, null, 2), options)
 }
 
+export function writeFileSync(filename: string, content: Uint8Array, options?: any) {
+    if (options?.recursive) {
+        const parent = path.dirname(filename)
+
+        fs.mkdirSync(parent, { recursive: true })
+    }
+
+    fs.writeFileSync(filename, content)
+}
+
+writeFileSync.text = function (filename: string, content: string, options?: any) {
+    writeFileSync(filename, new TextEncoder().encode(content), options)
+}
+
+writeFileSync.json = function (filename: string, content: any, options?: any) {
+    writeFileSync.text(filename, JSON.stringify(content, null, 2), options)
+}
+
 export function resolve(url: string, ...args: string[]) {
     const __dirname = path.dirname(fileURLToPath(url))
 
@@ -133,7 +181,9 @@ export const filesystem = {
     path,
     exists: fileExists,
     read: readFile,
+    readSync: readFileSync,
     readdir: readDir,
     write: writeFile,
+    writeSync: writeFileSync,
     resolve: resolve,
 }

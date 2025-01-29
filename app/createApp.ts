@@ -1,10 +1,15 @@
+import fs from 'fs'
+import winston from 'winston'
 import type { Commander } from '../commander/index.ts'
-import type { Logger } from '../logger/index.ts'
+import { formatPretty, type Logger } from '../logger/index.ts'
 import type { Scheduler } from '../scheduler/types.ts'
 import minimist from 'minimist'
 import type { Plugin } from './types.ts'
 import dotenv from 'dotenv'
 import { filesystem } from '../utils/filesystem.ts'
+import { shell } from '../utils/shell.ts'
+import { createConfig } from '../utils/createConfig.ts'
+import { resolve } from 'path'
 
 interface Config {
     rootDir?: string
@@ -21,17 +26,64 @@ export function createApp(config: Config) {
 
     dotenv.config({ path: filesystem.path.join(rootDir, '.env') })
 
+    const labConfig = createConfig(resolve(rootDir, '.lab', 'config.json'), {
+        pid: null as null | number,
+    })
+
     const commander = config.commander
     const scheduler = config.scheduler
 
     async function start() {
+        // to keep logs from detached process
+        fs.writeFileSync('D:\\db\\.lab\\app.log', '') // This clears the file
+
+        const logFile = fs.createWriteStream(resolve(rootDir, '.lab', 'app.log'), { flags: 'a' })
+
+        logger.add(new winston.transports.Stream({ stream: logFile, format: formatPretty }))
+
+        console.log = function (message: any) {
+            logFile.write(message + '\n')
+            process.stdout.write(message + '\n') // Keep showing logs in terminal
+        }
+
+        console.error = function (message: any) {
+            logFile.write(message + '\n')
+            process.stderr.write(message + '\n')
+        }
+
         await scheduler.load()
         await commander.load()
 
         await scheduler.start()
 
+        process.on('SIGINT', async () => {
+            logger.info('stopping application', {
+                module: 'app',
+            })
+
+            labConfig.pid = null
+
+            process.exit(0)
+        })
+
+        labConfig.pid = process.pid
+
         // keep the app running
         await new Promise(() => {})
+    }
+
+    async function stop() {
+        logger.info('stopping application', {
+            module: 'app',
+        })
+
+        const command = shell.execute('taskkill', ['/pid', labConfig.pid.toString(), '/f', '/t'])
+
+        await command.ready
+
+        labConfig.pid = null
+
+        process.exit(0)
     }
 
     async function run() {
@@ -44,9 +96,40 @@ export function createApp(config: Config) {
         return commander.run(name, options)
     }
 
+    async function startDetach() {
+        const main = process.argv[1]
+
+        const { child } = shell.execute('node', [main, 'start'], {
+            detached: true,
+            stdio: 'ignore',
+        })
+
+        child.unref()
+
+        logger.info('started in detached mode', {
+            module: 'app',
+            pid: child.pid,
+        })
+
+        process.exit(0)
+    }
+
     commander.add({
         name: 'start',
-        async execute() {
+        async execute({ options }) {
+            if (labConfig.pid) {
+                logger.warn('process already running', {
+                    module: 'app',
+                    pid: labConfig.pid,
+                })
+
+                return
+            }
+
+            if (options.detach) {
+                return startDetach()
+            }
+
             // clear
             process.stdout.write('\x1Bc')
 
@@ -55,6 +138,51 @@ export function createApp(config: Config) {
             })
 
             await start()
+        },
+    })
+
+    commander.add({
+        name: 'stop',
+        async execute() {
+            if (!labConfig.pid) {
+                logger.warn('process not running', {
+                    module: 'app',
+                })
+
+                return
+            }
+
+            await stop()
+        },
+    })
+
+    commander.add({
+        name: 'show',
+        async execute() {
+            logger.info('showing application', {
+                module: 'app',
+                pid: labConfig.pid,
+            })
+        },
+    })
+
+    commander.add({
+        name: 'logs',
+        async execute() {
+            const logFile = resolve(rootDir, '.lab', 'app.log')
+
+            const { child } = shell.execute('powershell', [
+                'Get-Content',
+                logFile,
+                '-Wait',
+                '-Tail',
+                '30',
+            ])
+
+            child.stdout?.pipe(process.stdout)
+            child.stderr?.pipe(process.stderr)
+
+            await new Promise(() => {})
         },
     })
 

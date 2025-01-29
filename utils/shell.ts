@@ -1,31 +1,34 @@
 import { spawn } from 'child_process'
 
-function execute(bin: string, args: string[], options?: any) {
+function execute(bin: string, args: string[], options: any = {}) {
     const state = {
         stdout: '',
         stderr: '',
         code: null as null | number,
         done: false,
         ready: null as null | Promise<any>,
+        child: null as null | any,
     }
 
-    const child = spawn(bin, args, {})
+    const { onStdout, onStderr, onClose, ...rest } = options
 
-    child.stdout.on('data', function (data) {
+    const child = spawn(bin, args, rest)
+
+    child.stdout?.on('data', function (data) {
         data = data.toString().trim()
 
-        if (options?.onStdout) {
-            options.onStdout(data)
+        if (onStdout) {
+            onStdout(data)
         }
 
         state.stdout += data
     })
 
-    child.stderr.on('data', function (data) {
+    child.stderr?.on('data', function (data) {
         data = data.toString().trim()
 
-        if (options?.onStderr) {
-            options.onStderr(data)
+        if (onStderr) {
+            onStderr(data)
         }
 
         state.stderr += data
@@ -35,8 +38,8 @@ function execute(bin: string, args: string[], options?: any) {
         state.done = true
         state.code = code
 
-        if (options?.onClose) {
-            options.onClose(state)
+        if (onClose) {
+            onClose(state)
         }
     })
 
@@ -48,6 +51,8 @@ function execute(bin: string, args: string[], options?: any) {
             }
         }, 100)
     })
+
+    state.child = child
 
     return state
 }

@@ -18,7 +18,7 @@ export const system = {
         const args = [
             filename,
             '-title',
-            options.title,
+            `'${options.title}'`,
             '-items',
             `'${JSON.stringify(options.items)}'`,
         ]
@@ -28,6 +28,7 @@ export const system = {
         await command.ready
 
         if (command.code !== 0) {
+            console.error(command)
             throw new Error(command.stderr)
         }
 

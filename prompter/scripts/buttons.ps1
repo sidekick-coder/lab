@@ -1,7 +1,7 @@
 param (
     [string]$items,
     [string]$title,
-    [bool]$sound = $true
+    [bool]$sound = 1
 )
 
 Add-Type -AssemblyName PresentationFramework
