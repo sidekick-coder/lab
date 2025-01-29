@@ -34,20 +34,23 @@ export function createApp(config: Config) {
     const scheduler = config.scheduler
 
     async function start() {
+        const filename = resolve(rootDir, '.lab', 'app.log')
         // to keep logs from detached process
-        fs.writeFileSync('D:\\db\\.lab\\app.log', '') // This clears the file
+        await filesystem.write.text(filename, '', {
+            recursive: true,
+        })
 
-        const logFile = fs.createWriteStream(resolve(rootDir, '.lab', 'app.log'), { flags: 'a' })
+        const stream = fs.createWriteStream(resolve(rootDir, '.lab', 'app.log'), { flags: 'a' })
 
-        logger.add(new winston.transports.Stream({ stream: logFile, format: formatPretty }))
+        logger.add(new winston.transports.Stream({ stream, format: formatPretty }))
 
         console.log = function (message: any) {
-            logFile.write(message + '\n')
+            stream.write(message + '\n')
             process.stdout.write(message + '\n') // Keep showing logs in terminal
         }
 
         console.error = function (message: any) {
-            logFile.write(message + '\n')
+            stream.write(message + '\n')
             process.stderr.write(message + '\n')
         }
 
