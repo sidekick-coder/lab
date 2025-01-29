@@ -3,10 +3,10 @@ import type { RCloneConfig } from '../createRClonePlugin.ts'
 import { rclone } from '../rclone.ts'
 
 export default defineRoutine({
-    name: 'rclone:sync',
-    interval: '1h',
-    async execute({ logger, context, options }) {
-        if (!Array.isArray(context?.rclone.configs)) {
+    name: 'rclone:bisync',
+    interval: '30m',
+    async execute({ context, options }) {
+        if (!Array.isArray(context.rclone?.configs)) {
             console.log('No configs found')
             return
         }
@@ -18,13 +18,6 @@ export default defineRoutine({
             return
         }
 
-        for await (const config of configs) {
-            await rclone({
-                config,
-                action: 'sync',
-            })
-
-            logger.info('synced', config)
-        }
+        //return rclone.withConfig(configs, 'bisync', options)
     },
 })

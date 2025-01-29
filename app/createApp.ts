@@ -1,34 +1,28 @@
-import { createCommander, type CommanderConfig } from '../commander/index.ts'
-import { createLogger, type LoggerConfig } from '../logger/index.ts'
-import { createScheduler } from '../scheduler/createScheduler.ts'
-import type { SchedulerConfig } from '../scheduler/types.ts'
+import type { Commander } from '../commander/index.ts'
+import type { Logger } from '../logger/index.ts'
+import type { Scheduler } from '../scheduler/types.ts'
 import minimist from 'minimist'
 import type { Plugin } from './types.ts'
+import dotenv from 'dotenv'
+import { filesystem } from '../utils/filesystem.ts'
 
 interface Config {
-    debug?: boolean
-    commander: Omit<CommanderConfig, 'logger' | 'context'>
-    scheduler: Omit<SchedulerConfig, 'logger' | 'context'>
-    logger: LoggerConfig
+    rootDir?: string
+    commander: Commander
+    scheduler: Scheduler
+    logger: Logger
+    context?: Record<string, any>
 }
 
 export function createApp(config: Config) {
-    const logger = createLogger(config.logger)
-    const context: any = {}
+    const logger = config.logger
+    const context = config.context || {}
+    const rootDir = config.rootDir || process.cwd()
 
-    const commander = createCommander({
-        debug: config.debug,
-        ...config.commander,
-        logger: logger,
-        context: context,
-    })
+    dotenv.config({ path: filesystem.path.join(rootDir, '.env') })
 
-    const scheduler = createScheduler({
-        debug: config.debug,
-        ...config.scheduler,
-        logger: logger,
-        context: context,
-    })
+    const commander = config.commander
+    const scheduler = config.scheduler
 
     async function start() {
         await scheduler.load()
@@ -37,7 +31,6 @@ export function createApp(config: Config) {
         await scheduler.start()
 
         // keep the app running
-
         await new Promise(() => {})
     }
 

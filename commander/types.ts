@@ -1,11 +1,13 @@
 import type { Logger } from '../logger/index.ts'
 import type chalk from 'chalk'
+import type { Prompter } from '../prompter/index.ts'
 
 export interface CommandParams {
     options: Record<string, any>
     logger: Logger
     context: Record<string, any>
     colors: typeof chalk
+    prompter: Prompter
 }
 
 export interface Command {

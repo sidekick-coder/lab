@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
 import chalk from 'chalk'
 import { date } from '../utils/date.ts'
+import { prompter } from '../prompter/index.ts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -67,6 +68,7 @@ export function createCommander(config: CommanderConfig): Commander {
             context,
             options,
             colors: chalk,
+            prompter: prompter,
         })
 
         const end_date = date.now()

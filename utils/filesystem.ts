@@ -22,30 +22,35 @@ function awaitLock(path: string, timeout = 1000) {
 }
 
 export async function fileExists(path: string) {
-    const [, error] = await tryCatch(() =>
-        fs.promises
-            .access(path, fs.constants.F_OK)
-            .then(() => true)
-            .catch(() => false)
-    )
+    const [, error] = await tryCatch(() => fs.promises.access(path))
 
     return error ? false : true
 }
 
 export async function readFile(path: string) {
-    const [content, error] = await tryCatch(() => fs.promises.readFile(path, 'utf-8'))
+    const [content, error] = await tryCatch(() => fs.promises.readFile(path))
 
     if (error) {
         return null
     }
 
-    return content
+    return new Uint8Array(content)
+}
+
+readFile.text = async function (filepath: string, defaultValue: string = '') {
+    const content = await readFile(filepath)
+
+    if (!content) {
+        return defaultValue
+    }
+
+    return new TextDecoder().decode(content)
 }
 
 readFile.json = async function (path: string, defaultValue: any = null) {
-    const [content, error] = await tryCatch(() => fs.promises.readFile(path, 'utf-8'))
+    const content = await readFile.text(path)
 
-    if (error) {
+    if (!content) {
         return defaultValue
     }
 
@@ -76,28 +81,46 @@ export async function readDir(path: string, options?: any) {
     return result.map((file) => file.name)
 }
 
-export async function writeFile(path: string, content: string) {
-    if (locks.has(path)) {
-        await awaitLock(path)
+export async function mkdir(filepath: string, options?: any) {
+    if (await fileExists(filepath)) return
+
+    if (options?.recursive) {
+        const parent = path.dirname(filepath)
+
+        await mkdir(parent, options)
     }
 
-    locks.add(path)
+    await fs.promises.mkdir(filepath, options)
+}
 
-    const [, error] = await tryCatch(() => fs.promises.writeFile(path, content))
+export async function writeFile(filename: string, content: Uint8Array, options?: any) {
+    if (locks.has(filename)) {
+        await awaitLock(filename)
+    }
+
+    locks.add(filename)
+
+    if (options?.recursive) {
+        const parent = path.dirname(filename)
+
+        await mkdir(parent, { recursive: true })
+    }
+
+    const [, error] = await tryCatch(() => fs.promises.writeFile(filename, content))
+
+    locks.delete(filename)
 
     if (error) {
         throw error
     }
 }
 
-writeFile.json = async function (path: string, content: any) {
-    const [, error] = await tryCatch(() =>
-        fs.promises.writeFile(path, JSON.stringify(content, null, 2))
-    )
+writeFile.text = async function (filename: string, content: string, options?: any) {
+    await writeFile(filename, new TextEncoder().encode(content), options)
+}
 
-    if (error) {
-        throw error
-    }
+writeFile.json = async function (filename: string, content: any, options?: any) {
+    await writeFile.text(filename, JSON.stringify(content, null, 2), options)
 }
 
 export function resolve(url: string, ...args: string[]) {
@@ -107,6 +130,7 @@ export function resolve(url: string, ...args: string[]) {
 }
 
 export const filesystem = {
+    path,
     exists: fileExists,
     read: readFile,
     readdir: readDir,

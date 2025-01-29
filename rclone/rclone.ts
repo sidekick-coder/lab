@@ -5,83 +5,96 @@ import chalk from 'chalk'
 
 export interface RCloneRunParams {
     config: RCloneConfig
-    action?: 'sync' | 'check'
+    action?: string
+    args?: string[]
+    dryRun?: boolean
     disableDefaults?: boolean
     folders?: string[]
 }
 
-const commonFolderExcludes = ['$RECYCLE.BIN', 'System Volume Information', 'lost+found']
+export async function rclone(action: string, args: string[], options: Record<string, any> = {}) {
+    const bin = 'rclone'
+    const all = [] as string[]
 
-const commonRcloneExcludes = [
-    'node_modules/**',
-    'dist/**',
-    '.git/**',
-    '.cache/**',
-    '*.{gdoc,gslides,gsheet}',
-    '*desktop.ini',
-]
+    all.push(action)
+    all.push(...args)
 
-export async function rclone(params: RCloneRunParams) {
-    const config = params.config
-    const action = params.action || 'sync'
-    const disableDefaults = params.disableDefaults
-    const folders = params.folders
+    const entries = Object.entries(options)
+        .map(([key, value]) => (Array.isArray(value) ? value.map((v) => [key, v]) : [[key, value]]))
+        .flat()
 
-    let directories = await filesystem.readdir(config.dir, {
-        onlyDirectories: true,
-    })
+    for (const [key, value] of entries) {
+        if (typeof value === 'boolean') {
+            all.push(`--${key}`)
+            continue
+        }
 
-    if (folders) {
-        directories = directories.filter((dir) => folders.includes(dir))
+        all.push(`--${key}`, value)
     }
 
-    for await (const dir of directories) {
-        const exclude = {
-            folder: config.exclude?.folder ? config.exclude.folder.slice() : [],
-            pattern: config.exclude?.pattern ? config.exclude.pattern.slice() : [],
-        }
+    console.log(chalk.grey(`|---- ${bin} ${all.join(' ')}`))
 
-        if (!disableDefaults) {
-            exclude.folder.push(...commonFolderExcludes)
-            exclude.pattern.push(...commonRcloneExcludes)
-        }
+    const command = shell.execute(bin, all, {
+        onStdout: (data: string) => {
+            data.split('\n')
+                .filter((line) => line.trim().length > 0)
+                .forEach((line) => {
+                    console.log(chalk.grey(`|---- ${line}`))
+                })
+        },
+        onStderr: (data: string) => {
+            data.split('\n')
+                .filter((line) => line.trim().length > 0)
+                .forEach((line) => {
+                    console.log(chalk.grey(`|---- ${line}`))
+                })
+        },
+    })
 
-        if (exclude.folder.includes(dir)) continue
+    await command.ready
+}
 
-        if (folders && !folders.includes(dir)) continue
+rclone.withConfig = async (
+    config: RCloneConfig | RCloneConfig[],
+    action: string,
+    options: Record<string, any> = {}
+) => {
+    const configs = Array.isArray(config) ? config : [config]
+    const { folder, ...rest } = options
 
-        if (!disableDefaults && commonFolderExcludes.includes(dir)) continue
+    const systemFolders = ['$RECYCLE.BIN', 'System Volume Information', 'lost+found']
 
-        const bin = 'rclone'
-        const args = [action, join(config.dir, dir), `${config.remote}:${dir}`]
+    const defaultExcludes = [
+        'node_modules/**',
+        'dist/**',
+        '.git/**',
+        '.cache/**',
+        '*.{gdoc,gslides,gsheet}',
+        '*desktop.ini',
+    ]
 
-        if (!disableDefaults) {
-            commonRcloneExcludes.forEach((e) => args.push('--exclude', e))
-        }
-
-        console.log(
-            chalk.grey(`[${action.toUpperCase()}] ${config.dir}:${dir} -> ${config.remote}:${dir}`)
-        )
-        console.log(chalk.grey('|---- exclude.folder', exclude.folder.join(', ')))
-        console.log(chalk.grey('|---- exclude.pattern', exclude.pattern.join(', ')))
-
-        const command = shell.execute(bin, args, {
-            onStdout: (data: string) => {
-                data.split('\n')
-                    .filter((line) => line.trim().length > 0)
-                    .forEach((line) => {
-                        console.log(chalk.grey(`|---- ${line}`))
-                    })
-            },
-            onStderr: (data: string) => {
-                data.split('\n')
-                    .filter((line) => line.trim().length > 0)
-                    .forEach((line) => {
-                        console.log(chalk.grey(`|---- ${line}`))
-                    })
-            },
+    for await (const config of configs) {
+        const directories = await filesystem.readdir(config.dir, {
+            onlyDirectories: true,
         })
 
-        await command.ready
+        for await (const directory of directories) {
+            if (systemFolders.includes(directory)) continue
+
+            if (folder && !folder.includes(directory)) {
+                continue
+            }
+
+            const args = [join(config.dir, directory), `${config.remote}:${directory}`]
+
+            const flags = {
+                ...rest,
+                exclude: defaultExcludes,
+                verbose: true,
+                color: 'NEVER',
+            }
+
+            await rclone(action, args, flags)
+        }
     }
 }

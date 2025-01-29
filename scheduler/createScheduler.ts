@@ -50,6 +50,8 @@ export function createScheduler(config: SchedulerConfig): Scheduler {
     }
 
     async function load() {
+        if (routines.length) return
+
         const definitions = await findRouties()
 
         const db = await filesystem.read.json(config.schedule_filename, {
@@ -74,12 +76,16 @@ export function createScheduler(config: SchedulerConfig): Scheduler {
     }
 
     async function save() {
-        await filesystem.write.json(config.schedule_filename, {
+        const json = {
             last_update: date.now(),
             routines: routines.map((routine) => ({
                 name: routine.name,
                 next_run: routine.next_run,
             })),
+        }
+
+        await filesystem.write.json(config.schedule_filename, json, {
+            recursive: true,
         })
     }
 
@@ -102,6 +108,7 @@ export function createScheduler(config: SchedulerConfig): Scheduler {
         const result = routine.execute({
             logger: config.logger,
             options,
+            context: config.context,
         })
 
         routine.next_run = date.future(routine.interval)
@@ -114,7 +121,7 @@ export function createScheduler(config: SchedulerConfig): Scheduler {
                 start_date: start,
                 end_date: date.now(),
                 next_run: routine.next_run,
-                duration: date.diff(start, date.now()),
+                duration: date.diff(start, date.now(), 'ms'),
             })
         }
 
