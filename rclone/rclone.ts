@@ -35,6 +35,7 @@ export async function rclone(action: string, args: string[], options: Record<str
     console.log(chalk.grey(`|---- ${bin} ${all.join(' ')}`))
 
     const command = shell.execute(bin, all, {
+        windowsHide: true,
         onStdout: (data: string) => {
             data.split('\n')
                 .filter((line) => line.trim().length > 0)

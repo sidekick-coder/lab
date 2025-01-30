@@ -1,7 +1,7 @@
 import fs from 'fs'
 import winston from 'winston'
 import type { Commander } from '../commander/index.ts'
-import { formatPretty, type Logger } from '../logger/index.ts'
+import { formatter, type Logger } from '../logger/index.ts'
 import type { Scheduler } from '../scheduler/types.ts'
 import minimist from 'minimist'
 import type { Plugin } from './types.ts'
@@ -24,6 +24,8 @@ export function createApp(config: Config) {
     const context = config.context || {}
     const rootDir = config.rootDir || process.cwd()
 
+    const logFilename = resolve(rootDir, '.lab', 'app.log')
+
     dotenv.config({ path: filesystem.path.join(rootDir, '.env') })
 
     const labConfig = createConfig(resolve(rootDir, '.lab', 'config.json'), {
@@ -34,24 +36,28 @@ export function createApp(config: Config) {
     const scheduler = config.scheduler
 
     async function start() {
-        const filename = resolve(rootDir, '.lab', 'app.log')
         // to keep logs from detached process
-        await filesystem.write.text(filename, '', {
+        await filesystem.write.text(logFilename, '', {
             recursive: true,
         })
 
-        const stream = fs.createWriteStream(resolve(rootDir, '.lab', 'app.log'), { flags: 'a' })
+        const stream = fs.createWriteStream(logFilename, { autoClose: false })
 
-        logger.add(new winston.transports.Stream({ stream, format: formatPretty }))
+        logger.add(
+            new winston.transports.Stream({
+                stream,
+                format: formatter,
+            })
+        )
 
-        console.log = function (message: any) {
-            stream.write(message + '\n')
-            process.stdout.write(message + '\n') // Keep showing logs in terminal
+        console.log = function (...message: any[]) {
+            stream.write(message.join(' ') + '\n')
+            process.stdout.write(message.join(' ') + '\n')
         }
 
-        console.error = function (message: any) {
-            stream.write(message + '\n')
-            process.stderr.write(message + '\n')
+        console.error = function (...message: any[]) {
+            stream.write(message.join(' ') + '\n')
+            process.stderr.write(message.join(' ') + '\n')
         }
 
         await scheduler.load()
@@ -85,8 +91,6 @@ export function createApp(config: Config) {
         await command.ready
 
         labConfig.pid = null
-
-        process.exit(0)
     }
 
     async function run() {
@@ -102,9 +106,20 @@ export function createApp(config: Config) {
     async function startDetach() {
         const main = process.argv[1]
 
+        console.log('[file]:', logFilename)
+        console.log('[command]:', 'node', main, 'start')
+
         const { child } = shell.execute('node', [main, 'start'], {
+            env: {
+                ...process.env,
+                LAB_DETACHED: 'true',
+                // colors
+                FORCE_COLOR: '1',
+            },
             detached: true,
             stdio: 'ignore',
+            //shell: true,
+            //windowsHide: true,
         })
 
         child.unref()
@@ -156,6 +171,25 @@ export function createApp(config: Config) {
             }
 
             await stop()
+
+            process.exit(0)
+        },
+    })
+
+    commander.add({
+        name: 'restart',
+        async execute() {
+            if (!labConfig.pid) {
+                logger.warn('process not running', {
+                    module: 'app',
+                })
+
+                return
+            }
+
+            await stop()
+
+            await startDetach()
         },
     })
 
@@ -172,11 +206,11 @@ export function createApp(config: Config) {
     commander.add({
         name: 'logs',
         async execute() {
-            const logFile = resolve(rootDir, '.lab', 'app.log')
+            console.log('[file]:', logFilename)
 
             const { child } = shell.execute('powershell', [
                 'Get-Content',
-                logFile,
+                logFilename,
                 '-Wait',
                 '-Tail',
                 '30',
