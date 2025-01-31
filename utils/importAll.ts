@@ -1,8 +1,15 @@
 import { promises as fs } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
+import { filesystem } from './filesystem.ts'
 
 export async function importAll(path: string, options?: any) {
+    const exists = await filesystem.exists(path)
+
+    if (!exists) {
+        return {}
+    }
+
     const files = await fs.readdir(path)
 
     const result = {}

@@ -111,6 +111,34 @@ export async function readDir(path: string, options?: any) {
     return result.map((file) => file.name)
 }
 
+export function readDirSync(path: string, options?: any) {
+    const [files, error] = tryCatch.sync(() =>
+        fs.readdirSync(path, {
+            withFileTypes: true,
+        })
+    )
+
+    if (error) {
+        return []
+    }
+
+    let result = files
+
+    if (options?.onlyFiles) {
+        result = files.filter((file) => file.isFile())
+    }
+
+    if (options?.onlyDirectories) {
+        result = files.filter((file) => file.isDirectory())
+    }
+
+    return result.map((file) => file.name)
+}
+
+export function copy(source: string, destination: string, options?: any) {
+    return fs.promises.cp(source, destination, options)
+}
+
 export async function mkdir(filepath: string, options?: any) {
     if (await fileExists(filepath)) return
 
@@ -183,6 +211,8 @@ export const filesystem = {
     read: readFile,
     readSync: readFileSync,
     readdir: readDir,
+    readdirSync: readDirSync,
+    copy: copy,
     write: writeFile,
     writeSync: writeFileSync,
     resolve: resolve,

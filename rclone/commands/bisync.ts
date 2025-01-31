@@ -17,6 +17,6 @@ export default defineCommand({
             return
         }
 
-        //return rclone.withConfig(configs, 'sync', options)
+        return rclone.withConfig(configs, 'bisync', options)
     },
 })

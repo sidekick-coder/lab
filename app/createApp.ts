@@ -223,6 +223,14 @@ export function createApp(config: Config) {
         },
     })
 
+    commander.add({
+        name: 'scheduler:run',
+        async execute({ options }) {
+            await scheduler.load()
+            await scheduler.run(options.name, options)
+        },
+    })
+
     async function plugin(payload: Plugin) {
         await payload.install({
             commander,
@@ -231,12 +239,6 @@ export function createApp(config: Config) {
             logger,
             context,
         })
-
-        if (config.debug) {
-            logger.info(`plugin installed: ${payload.name}`, {
-                payload,
-            })
-        }
     }
 
     return {

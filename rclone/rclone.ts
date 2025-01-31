@@ -63,7 +63,7 @@ rclone.withConfig = async (
     const configs = Array.isArray(config) ? config : [config]
     const { folder, ...rest } = options
 
-    const systemFolders = ['$RECYCLE.BIN', 'System Volume Information', 'lost+found']
+    const systemFolders = ['$RECYCLE.BIN', 'System Volume Information', 'lost+found', 'Recovery']
 
     const defaultExcludes = [
         'node_modules/**',
@@ -91,7 +91,6 @@ rclone.withConfig = async (
             const flags = {
                 ...rest,
                 exclude: defaultExcludes,
-                verbose: true,
                 color: 'NEVER',
             }
 
