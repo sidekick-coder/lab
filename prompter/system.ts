@@ -23,7 +23,9 @@ export const system = {
             `'${JSON.stringify(options.items)}'`,
         ]
 
-        const command = shell.execute(bin, args)
+        const command = shell.execute(bin, args, {
+            windowsHide: true,
+        })
 
         await command.ready
 

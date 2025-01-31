@@ -1,6 +1,6 @@
 param (
     [string]$items,
-    [string]$title,
+    [string]$title = "Select an Option",
     [bool]$sound = 1
 )
 
@@ -15,14 +15,14 @@ $themeValue = Get-ItemPropertyValue -Path $themeKey -Name AppsUseLightTheme -Err
 $darkMode = if ($themeValue -eq 0) { $true } else { $false }
 
 # Colors based on Theme
-$bgColor = if ($darkMode) { "#202020" } else { "#FFFFFF" }
-$txtColor = if ($darkMode) { "#FFFFFF" } else { "#333333" }
+$bgColor = '#FFFFFF'
+$txtColor =  "#333333"
 
 # Create Window (Always on Main Monitor)
 $window = New-Object System.Windows.Window
 $window.Title = $title
 $window.Width = 320
-$window.Height = 50 + ($buttons.Count * 50) # Adjust height based on button count
+$window.Height = 100 + ($buttons.Count * 50) # Adjust height based on button count
 $window.WindowStartupLocation = "CenterOwner"
 $window.Background = $bgColor
 $window.Topmost = $true
@@ -45,6 +45,16 @@ $stackPanel.HorizontalAlignment = "Center"
 $stackPanel.VerticalAlignment = "Center"
 $stackPanel.Margin = "15"
 
+$textBlock = New-Object System.Windows.Controls.TextBlock 
+$textBlock.Text = $title 
+$textBlock.FontSize = 20 
+$textBlock.FontWeight = "Bold"
+$textBlock.Foreground = $txtColor 
+$textBlock.HorizontalAlignment = "Center" 
+$textBlock.Margin = "10"
+
+$stackPanel.AddChild($textBlock)
+
 # Button Styles
 function Create-Button($name, $value, $color) {
     $button = New-Object System.Windows.Controls.Button
@@ -54,8 +64,8 @@ function Create-Button($name, $value, $color) {
     $button.Height = 45
     $button.FontSize = 16
     $button.FontWeight = "Medium"
-    $button.Background = if ($color) { $color } else { "#0078D4" } # Default color if not provided
-    $button.Foreground = if ($darkMode) { "#FFFFFF" } else { "#000000" }
+    $button.Background = "#0078D4"
+    $button.Foreground =  "#FFFFFF"
     $button.BorderThickness = 0
     $button.HorizontalAlignment = "Center"
     $button.Cursor = "Hand"
