@@ -2,6 +2,7 @@ import type { Routine, Scheduler, SchedulerConfig } from './types.ts'
 import { importAll } from '../utils/importAll.ts'
 import { filesystem } from '../utils/filesystem.ts'
 import { date } from '../utils/date.ts'
+import chalk from 'chalk'
 
 export function createScheduler(config: SchedulerConfig): Scheduler {
     const routines: Routine[] = []
@@ -109,6 +110,7 @@ export function createScheduler(config: SchedulerConfig): Scheduler {
             logger: config.logger,
             options,
             context: config.context,
+            colors: chalk,
         })
 
         routine.next_run = date.future(routine.interval)

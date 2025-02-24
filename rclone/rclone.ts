@@ -88,9 +88,15 @@ rclone.withConfig = async (
 
             const args = [join(config.dir, directory), `${config.remote}:${directory}`]
 
+            const allExcludes = defaultExcludes.slice()
+
+            if (config.exclude?.pattern) {
+                allExcludes.push(...config.exclude.pattern)
+            }
+
             const flags = {
                 ...rest,
-                exclude: defaultExcludes,
+                exclude: allExcludes,
                 color: 'NEVER',
             }
 

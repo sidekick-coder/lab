@@ -54,7 +54,9 @@ readFile.json = async function (path: string, defaultValue: any = null) {
         return defaultValue
     }
 
-    return JSON.parse(content)
+    const [json, error] = await tryCatch(() => JSON.parse(content))
+
+    return error ? defaultValue : json
 }
 
 export function readFileSync(path: string) {
@@ -84,7 +86,9 @@ readFileSync.json = function (path: string, defaultValue: any = null) {
         return defaultValue
     }
 
-    return JSON.parse(content)
+    const [json, error] = tryCatch.sync(() => JSON.parse(content))
+
+    return error ? defaultValue : json
 }
 
 export async function readDir(path: string, options?: any) {

@@ -3,10 +3,13 @@ import chalk from 'chalk'
 import { printObject } from '../utils/index.ts'
 
 const { format } = winston
-const { combine } = winston.format
 
 export function formatLog(data: any) {
-    const { level, message, timestamp, label, module, command, stack, ...rest } = data
+    const { raw, level, message, timestamp, label, module, command, stack, ...rest } = data
+
+    if (raw) {
+        return message
+    }
 
     let result = `${timestamp} ${level}`
 

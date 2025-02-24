@@ -12,11 +12,7 @@ export const date = {
     time(payload: Date | string) {
         const value = payload
 
-        if (typeof value === 'string') {
-            return new Date(value).getTime()
-        }
-
-        return value.getTime()
+        return new Date(value).getTime()
     },
     now() {
         return date.format(new Date())
@@ -46,18 +42,22 @@ export const date = {
     ): T extends 'ms' ? string : number {
         const milliseconds = date.time(a) - date.time(b)
 
-        if (format === 'seconds') {
-            return (milliseconds / 1000) as any
-        }
-
-        if (format === 'minutes') {
-            return (milliseconds / 1000 / 60) as any
-        }
-
         if (format === 'ms') {
             return ms(milliseconds, { long: true }) as any
         }
 
-        return milliseconds as any
+        let value = milliseconds
+
+        if (format === 'seconds') {
+            value = milliseconds / 1000
+        }
+
+        if (format === 'minutes') {
+            value = milliseconds / 1000 / 60
+        }
+
+        value = Number(value.toFixed(2))
+
+        return value as any
     },
 }

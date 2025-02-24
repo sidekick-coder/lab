@@ -4,6 +4,7 @@ export interface RoutineParams {
     logger: Logger
     options: Record<string, any>
     context: Record<string, any>
+    colors: any
 }
 
 export interface RoutineDefinition {
