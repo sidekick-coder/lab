@@ -28,4 +28,5 @@ export interface Commander {
     add(command: Command): void
     addDir(dir: string): void
     run(name: string, options: Record<string, any>): Promise<any>
+    handle(args: string[]): Promise<any>
 }

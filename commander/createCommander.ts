@@ -5,6 +5,7 @@ import { dirname, resolve } from 'path'
 import chalk from 'chalk'
 import { date } from '../utils/date.ts'
 import { prompter } from '../prompter/index.ts'
+import minimist from 'minimist'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -79,10 +80,20 @@ export function createCommander(config: CommanderConfig): Commander {
                 options,
                 start_date,
                 end_date,
-                duration: date.diff(start_date, end_date),
+                duration: date.diff(start_date, end_date, 'ms'),
                 result,
             })
         }
+    }
+
+    async function handle(args: string[]) {
+        await load()
+
+        const { _, ...options } = minimist(args)
+
+        const [name] = _
+
+        return run(name, options)
     }
 
     // add defaults
@@ -94,5 +105,6 @@ export function createCommander(config: CommanderConfig): Commander {
         add,
         addDir,
         run,
+        handle,
     }
 }
