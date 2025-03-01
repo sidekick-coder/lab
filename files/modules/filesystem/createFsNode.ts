@@ -1,7 +1,7 @@
 import cp from 'child_process'
 import fs from 'fs'
 import os from 'os'
-import { FilesystemOptionsFs } from './types.js'
+import type { FilesystemOptionsFs } from './types.js'
 import { tryCatch } from '@files/utils/tryCatch.js'
 import { join } from 'path'
 
@@ -82,6 +82,22 @@ export function createFsNode(): FilesystemOptionsFs {
         }
     }
 
+    const copy: FilesystemOptionsFs['copy'] = async (source: string, target: string) => {
+        const [, error] = await tryCatch(() => fs.promises.cp(source, target))
+
+        if (error) {
+            throw error
+        }
+    }
+
+    const copySync: FilesystemOptionsFs['copySync'] = (source: string, target: string) => {
+        const [, error] = tryCatch.sync(() => fs.cpSync(source, target))
+
+        if (error) {
+            throw error
+        }
+    }
+
     const remove: FilesystemOptionsFs['remove'] = async (path: string) => {
         const [, error] = await tryCatch(() => fs.promises.rm(path, { recursive: true }))
 
@@ -142,6 +158,9 @@ export function createFsNode(): FilesystemOptionsFs {
 
         mkdir,
         mkdirSync,
+
+        copy,
+        copySync,
 
         remove,
         removeSync,

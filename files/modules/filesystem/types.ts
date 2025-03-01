@@ -14,6 +14,9 @@ export interface FilesystemOptionsFs {
     mkdir: (path: string) => Promise<void>
     mkdirSync: (path: string) => void
 
+    copy: (source: string, target: string) => Promise<void>
+    copySync: (source: string, target: string) => void
+
     remove: (path: string) => Promise<void>
     removeSync: (path: string) => void
     removeAt: (path: string, miliseconds: number) => Promise<boolean>

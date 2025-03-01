@@ -3,7 +3,8 @@ import { YAML } from '@files/utils/yaml.js'
 import type { FilesystemOptions } from './types.js'
 import { createFsNode } from './createFsNode.js'
 import { createPathNode } from './createPathNode.js'
-import { validate, ValidatePayload, ValidateResult } from '../validator/validate.js'
+import type { ValidatePayload, ValidateResult } from '../validator/validate.js'
+import { validate } from '../validator/validate.js'
 
 export type Filesystem = ReturnType<typeof createFilesystem>
 
@@ -151,30 +152,6 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         return [] as string[]
     }
 
-    async function mkdir(filepath: string, options?: any) {
-        if (await fs.exists(filepath)) return
-
-        if (options?.recursive) {
-            const parent = path.dirname(filepath)
-
-            await mkdir(parent, options)
-        }
-
-        await fs.mkdir(filepath)
-    }
-
-    function mkdirSync(filepath: string, options?: any) {
-        if (fs.existsSync(filepath)) return
-
-        if (options?.recursive) {
-            const parent = path.dirname(filepath)
-
-            mkdirSync(parent, options)
-        }
-
-        fs.mkdirSync(filepath)
-    }
-
     async function write(filename: string, content: Uint8Array, options?: any) {
         if (locks.has(filename)) {
             await awaitLock(filename)
@@ -223,6 +200,38 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         writeSync.text(filename, JSON.stringify(content, null, 2), options)
     }
 
+    async function mkdir(filepath: string, options?: any) {
+        if (await fs.exists(filepath)) return
+
+        if (options?.recursive) {
+            const parent = path.dirname(filepath)
+
+            await mkdir(parent, options)
+        }
+
+        await fs.mkdir(filepath)
+    }
+
+    function mkdirSync(filepath: string, options?: any) {
+        if (fs.existsSync(filepath)) return
+
+        if (options?.recursive) {
+            const parent = path.dirname(filepath)
+
+            mkdirSync(parent, options)
+        }
+
+        fs.mkdirSync(filepath)
+    }
+
+    async function copy(source: string, target: string) {
+        return fs.copy(source, target)
+    }
+
+    function copySync(source: string, target: string) {
+        return fs.copySync(source, target)
+    }
+
     function remove(filepath: string) {
         return fs.remove(filepath)
     }
@@ -255,6 +264,9 @@ export function createFilesystem(options: FilesystemOptions = {}) {
 
         mkdir,
         mkdirSync,
+
+        copy,
+        copySync,
 
         remove,
         removeSync,
