@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+        "strict": false,
+		"moduleDetection": "force",
+		"module": "nodenext",
+        "moduleResolution": "nodenext",
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"esModuleInterop": true,
+		"isolatedModules": true,
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"],
+            "@files/*": ["./files/*"]
+        }
+	}
+}
