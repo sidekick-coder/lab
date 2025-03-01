@@ -3,6 +3,7 @@ import { SourceOptions } from '@files/utils/sources/types.js'
 export interface Command {
     name: string
     description?: string
+    args?: ArgDefinitionRecord
     execute(): Promise<any> | void
 }
 

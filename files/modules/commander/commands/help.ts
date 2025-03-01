@@ -9,10 +9,44 @@ export default defineCommand({
     name: 'help',
     async execute() {
         const commands = inject<Command[]>('commands')
+        const [name] = inject<string[]>('args')
+
+        const command = commands.find((command) => command.name === name)
 
         const ui = require('cliui')({})
 
-        ui.div('Usage: lab [command] [options]')
+        if (command) {
+            ui.div({
+                text: `Usage: lab ${command.name} [ARGS] [ARG...]`,
+                padding: [1, 0, 1, 0],
+            })
+
+            if (command.args) {
+                ui.div('Arguments:')
+
+                Object.entries(command.args).forEach(([name, arg]) => {
+                    ui.div(
+                        {
+                            text: `${name}:`,
+                            width: 20,
+                            padding: [0, 4, 0, 4],
+                        },
+                        {
+                            text: arg.description || '',
+                            padding: [0, 0, 0, 0],
+                        }
+                    )
+                })
+            }
+
+            console.log(ui.toString())
+            return
+        }
+
+        ui.div({
+            text: 'Usage: lab [COMMAND] [OPTIONS]',
+            padding: [1, 0, 1, 0],
+        })
 
         ui.div('Commands:')
 

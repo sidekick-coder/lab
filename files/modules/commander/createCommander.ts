@@ -30,17 +30,22 @@ export function createCommander(payload: CommanderConfig) {
             name = `${options.prefix}${name}`
         }
         commands.push({
+            ...command,
             name: name,
-            description: command.description,
-            execute: command.execute,
         })
     }
 
     function addFile(file: string, options: AddOptions = {}) {
-        const command = require(file).default
+        const fileModule = require(file)
+        const command = fileModule.default
+        const argsDefinition = fileModule.args
 
         if (!command.name) {
             command.name = filesystem.path.basename(file)
+        }
+
+        if (argsDefinition) {
+            command.args = argsDefinition
         }
 
         add(command, options)
@@ -72,6 +77,7 @@ export function createCommander(payload: CommanderConfig) {
         ctx.open()
 
         ctx.provide('commands', commands)
+        ctx.provide('args', args.slice(1))
 
         const [response, error] = await tryCatch(() => run(name))
 
