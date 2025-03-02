@@ -1,9 +1,10 @@
 import cp from 'child_process'
 import fs from 'fs'
 import os from 'os'
+import fg from 'fast-glob'
+import path, { join } from 'path'
 import type { FilesystemOptionsFs } from './types.js'
 import { tryCatch } from '@files/utils/tryCatch.js'
-import { join } from 'path'
 
 export function createFsNode(): FilesystemOptionsFs {
     const exists: FilesystemOptionsFs['exists'] = async (path: string) => {
@@ -48,6 +49,30 @@ export function createFsNode(): FilesystemOptionsFs {
         const [files, error] = tryCatch.sync(() => fs.readdirSync(path))
 
         return error ? [] : files
+    }
+
+    const glob: FilesystemOptionsFs['glob'] = async (pattern: string) => {
+        const patterFixed = fg.convertPathToPattern(pattern)
+
+        const [files, error] = await tryCatch(() => fg(patterFixed))
+
+        if (error) {
+            return []
+        }
+
+        return files.map(path.normalize)
+    }
+
+    const globSync: FilesystemOptionsFs['globSync'] = (pattern: string) => {
+        const patterFixed = fg.convertPathToPattern(pattern)
+
+        const [files, error] = tryCatch.sync(() => fg.sync(patterFixed))
+
+        if (error) {
+            return []
+        }
+
+        return files.map(path.normalize)
     }
 
     const write: FilesystemOptionsFs['write'] = async (path: string, content: Uint8Array) => {
@@ -152,6 +177,9 @@ export function createFsNode(): FilesystemOptionsFs {
 
         readdir,
         readdirSync,
+
+        glob,
+        globSync,
 
         write,
         writeSync,

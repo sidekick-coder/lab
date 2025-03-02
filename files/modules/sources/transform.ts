@@ -1,5 +1,5 @@
 import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
-import { SourceItem, SourceOptions } from './types.js'
+import type { SourceItem, SourceOptions } from './types.js'
 
 export function transform(options: SourceOptions) {
     const filesystem = createFilesystem()
@@ -31,7 +31,7 @@ export function transform(options: SourceOptions) {
         const entries = filesystem.globSync(pattern)
 
         entries.forEach((entry) => {
-            files.push(resolve(entry))
+            files.push(entry)
         })
     }
 

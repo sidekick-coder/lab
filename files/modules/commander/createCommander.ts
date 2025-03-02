@@ -1,7 +1,8 @@
+import { createRequire } from 'module'
+
 import type { Command, CommanderConfig } from './types.js'
 import { validate } from '@files/modules/validator/index.js'
-import { schema as sources } from '@files/utils/sources/index.js'
-import { createRequire } from 'module'
+import { schema as sources } from '@files/modules/sources/index.js'
 import { createFilesystem } from '../filesystem/createFilesystem.js'
 import { tryCatch } from '@files/utils/tryCatch.js'
 import * as ctx from '@files/modules/context/index.js'
@@ -29,6 +30,13 @@ export function createCommander(payload: CommanderConfig) {
         if (options.prefix) {
             name = `${options.prefix}${name}`
         }
+
+        const exists = commands.some((command) => command.name === name)
+
+        if (exists) {
+            return
+        }
+
         commands.push({
             ...command,
             name: name,
@@ -39,6 +47,8 @@ export function createCommander(payload: CommanderConfig) {
         const fileModule = require(file)
         const command = fileModule.default
         const argsDefinition = fileModule.args
+
+        if (!command) return
 
         if (!command.name) {
             command.name = filesystem.path.basename(file)
@@ -71,7 +81,7 @@ export function createCommander(payload: CommanderConfig) {
         const exists = commands.some((command) => command.name === name)
 
         if (!exists) {
-            name = 'commander:help'
+            name = 'help'
         }
 
         ctx.open()
@@ -91,11 +101,9 @@ export function createCommander(payload: CommanderConfig) {
     }
 
     // commander commands
-    options.sources.forEach((s) => addFile(s))
+    addDir(resolve(import.meta.dirname, 'commands'))
 
-    addDir(resolve(import.meta.dirname, 'commands'), {
-        prefix: 'commander:',
-    })
+    options.sources.forEach((s) => addFile(s))
 
     return {
         commands,

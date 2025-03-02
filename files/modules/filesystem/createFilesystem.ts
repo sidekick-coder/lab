@@ -145,11 +145,11 @@ export function createFilesystem(options: FilesystemOptions = {}) {
     }
 
     function glob(pattern: string) {
-        return [] as string[]
+        return fs.glob(pattern)
     }
 
     function globSync(pattern: string) {
-        return [] as string[]
+        return fs.globSync(pattern)
     }
 
     async function write(filename: string, content: Uint8Array, options?: any) {

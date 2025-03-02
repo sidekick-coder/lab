@@ -8,6 +8,9 @@ export interface FilesystemOptionsFs {
     readdir: (path: string) => Promise<string[]>
     readdirSync: (path: string) => string[]
 
+    glob: (pattern: string) => Promise<string[]>
+    globSync: (pattern: string) => string[]
+
     write: (path: string, content: Uint8Array) => Promise<void>
     writeSync: (path: string, content: Uint8Array) => void
 
@@ -29,6 +32,7 @@ export interface FilesystemOptionsPath {
     join: (...args: string[]) => string
     dirname: (args: string) => string
     basename: (args: string) => string
+    relative: (from: string, to: string) => string
 }
 
 export interface FilesystemOptions {

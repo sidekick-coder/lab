@@ -1,5 +1,5 @@
 import path from 'path'
-import { FilesystemOptionsPath } from './types.js'
+import type { FilesystemOptionsPath } from './types.js'
 
 export function createPathNode(): FilesystemOptionsPath {
     return {
@@ -7,5 +7,6 @@ export function createPathNode(): FilesystemOptionsPath {
         join: (...args: string[]) => path.join(...args),
         dirname: (args: string) => path.dirname(args),
         basename: (args: string) => path.basename(args),
+        relative: (from: string, to: string) => path.relative(from, to),
     }
 }

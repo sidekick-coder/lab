@@ -1,4 +1,6 @@
+import path from 'path'
 import type { Config } from '@/types.js'
+import { copyFile } from '@/utils/copyFile.js'
 import { defineArgs, useArgs } from '@files/modules/commander/args.js'
 import { defineCommand } from '@files/modules/commander/defineCommand.js'
 import { defineFlags, useFlags } from '@files/modules/commander/flags.js'
@@ -19,8 +21,8 @@ export const flags = defineFlags({
 })
 
 export default defineCommand({
-    name: 'add:util',
-    description: 'Add a new utility command',
+    name: 'add:module',
+    description: 'Add a module command',
     execute() {
         const { name } = useArgs(args)
         const { force } = useFlags(flags)
@@ -28,20 +30,32 @@ export default defineCommand({
         const config = inject<Config>('config')
         const filesystem = createFilesystem()
         const resolve = filesystem.path.resolve
-        const utilsDir = resolve(import.meta.dirname, '../../files/utils')
+        const relative = filesystem.path.relative
+        const modulesDir = resolve(import.meta.dirname, '../../files/modules')
 
-        const utilName = camelCase(name) + '.ts'
+        const moduleName = camelCase(name)
 
-        const source = resolve(utilsDir, utilName)
-        const target = resolve(config.baseDir, 'utils', utilName)
+        const source = resolve(modulesDir, moduleName)
+        const target = resolve(config.baseDir, 'modules', moduleName)
 
         if (filesystem.existsSync(target) && !force) {
-            console.log(`Utility command ${name} already exists`)
+            console.log(`Module ${name} already exists, use --force to overwrite`)
             return
         }
 
-        filesystem.copySync(source, target)
+        const files = filesystem.globSync(resolve(source, '**', '*'))
 
-        console.log(`Added ${name} utility command`)
+        for (const file of files) {
+            const relativeName = path.relative(source, file)
+
+            const src = resolve(source, relativeName)
+            const trg = resolve(target, relativeName)
+
+            copyFile(src, trg, { baseDir: config.baseDir })
+
+            console.log(`File ${relative(target, trg)} added`)
+        }
+
+        console.log(`Module ${name} added`)
     },
 })
