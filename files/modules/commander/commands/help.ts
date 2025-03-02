@@ -51,7 +51,7 @@ export default defineCommand({
 
         ui.div('Commands:')
 
-        for (const command of commands) {
+        for (const command of commands.toSorted((a, b) => a.name.localeCompare(b.name))) {
             ui.div(
                 {
                     text: command.name,

@@ -84,6 +84,10 @@ export function createCommander(payload: CommanderConfig) {
             throw new Error(`Plugin not found: ${name}`)
         }
 
+        if (plugin.type !== 'execute') {
+            throw new Error(`Plugin type not execlute`)
+        }
+
         return await plugin.execute(args)
     }
 
@@ -137,6 +141,14 @@ export function createCommander(payload: CommanderConfig) {
 
     function addPlugin(plugin: Plugin) {
         plugins.push(plugin)
+
+        if (plugin.type === 'command-list') {
+            plugin.commands.forEach((c) =>
+                add(c, {
+                    prefix: plugin.prefix,
+                })
+            )
+        }
     }
 
     // commander commands

@@ -21,7 +21,17 @@ export interface Commander {
     handle(args: string[]): Promise<any>
 }
 
-export interface Plugin {
+export interface PluginExecute {
     name: string
+    type: 'execute'
     execute(options: string[]): Promise<any>
 }
+
+export interface PluginCommandList {
+    name: string
+    prefix?: string
+    type: 'command-list'
+    commands: Command[]
+}
+
+export type Plugin = PluginExecute | PluginCommandList
