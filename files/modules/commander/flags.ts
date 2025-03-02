@@ -12,7 +12,7 @@ export function defineFlags<T extends FlagDefinitionRecord>(args: T): T {
 }
 
 export function useFlags<T extends FlagDefinitionRecord>(_definition: T) {
-    const args = inject<string[]>('args')
+    const args = inject<string[]>('commander:args')
 
     const flags = minimist(args)
 

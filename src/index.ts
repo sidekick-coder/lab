@@ -27,4 +27,14 @@ const commander = createCommander({
     },
 })
 
+commander.addPlugin({
+    name: 'rclone',
+    async execute(args) {
+        console.log({
+            message: 'rclone',
+            args,
+        })
+    },
+})
+
 commander.handle(process.argv.slice(2))

@@ -1,11 +1,12 @@
 import { createRequire } from 'module'
 
-import type { Command, CommanderConfig } from './types.js'
+import type { Command, CommanderConfig, Plugin } from './types.js'
 import { validate } from '@files/modules/validator/index.js'
 import { schema as sources } from '@files/modules/sources/index.js'
 import { createFilesystem } from '../filesystem/createFilesystem.js'
 import { tryCatch } from '@files/utils/tryCatch.js'
 import * as ctx from '@files/modules/context/index.js'
+import minimist from 'minimist'
 
 const require = createRequire(import.meta.url)
 
@@ -15,6 +16,7 @@ interface AddOptions {
 
 export function createCommander(payload: CommanderConfig) {
     const commands: Command[] = []
+    const plugins: Plugin[] = []
     const filesystem = createFilesystem()
     const resolve = filesystem.path.resolve
 
@@ -75,8 +77,40 @@ export function createCommander(payload: CommanderConfig) {
         return await command.execute()
     }
 
+    async function runPlugin(name: string, args: string[]) {
+        const plugin = plugins.find((plugin) => plugin.name === name)
+
+        if (!plugin) {
+            throw new Error(`Plugin not found: ${name}`)
+        }
+
+        return await plugin.execute(args)
+    }
+
     async function handle(args: string[]) {
-        let [name] = args
+        const { _, plugin, ...rest } = minimist(args, { alias: { p: 'plugin' } })
+
+        let newArgs = _
+
+        Object.entries(rest)
+            .filter(([key]) => key !== 'p')
+            .map(([key, value]) => {
+                if (!Array.isArray(value)) {
+                    return [[key, value]]
+                }
+
+                return value.map((v) => [key, v])
+            })
+            .flat()
+            .forEach(([key, value]) => {
+                newArgs = newArgs.concat(`--${key}`, String(value))
+            })
+
+        if (plugin) {
+            return runPlugin(plugin, newArgs)
+        }
+
+        let [name] = _
 
         const exists = commands.some((command) => command.name === name)
 
@@ -86,8 +120,9 @@ export function createCommander(payload: CommanderConfig) {
 
         ctx.open()
 
-        ctx.provide('commands', commands)
-        ctx.provide('args', args.slice(1))
+        ctx.provide('commander:commands', commands)
+        ctx.provide('commander:plugins', plugins)
+        ctx.provide('commander:args', newArgs.slice(1))
 
         const [response, error] = await tryCatch(() => run(name))
 
@@ -100,6 +135,10 @@ export function createCommander(payload: CommanderConfig) {
         return response
     }
 
+    function addPlugin(plugin: Plugin) {
+        plugins.push(plugin)
+    }
+
     // commander commands
     addDir(resolve(import.meta.dirname, 'commands'))
 
@@ -110,6 +149,7 @@ export function createCommander(payload: CommanderConfig) {
         add,
         addFile,
         addDir,
+        addPlugin,
         run,
         handle,
     }

@@ -1,4 +1,4 @@
-import type { SourceOptions } from '@files/utils/sources/types.js'
+import type { SourceOptions } from '@files/modules/sources/types.js'
 import type { ArgDefinitionRecord } from './args.js'
 
 export interface Command {
@@ -19,4 +19,9 @@ export interface Commander {
     addDir(dir: string): void
     run(name: string, options: Record<string, any>): Promise<any>
     handle(args: string[]): Promise<any>
+}
+
+export interface Plugin {
+    name: string
+    execute(options: string[]): Promise<any>
 }

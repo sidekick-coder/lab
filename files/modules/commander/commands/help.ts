@@ -8,8 +8,9 @@ const require = createRequire(import.meta.url)
 export default defineCommand({
     name: 'help',
     async execute() {
-        const commands = inject<Command[]>('commands')
-        const [name] = inject<string[]>('args')
+        const commands = inject<Command[]>('commander:commands')
+        const plugins = inject<Command[]>('commander:plugins')
+        const [name] = inject<string[]>('commander:args')
 
         const command = commands.find((command) => command.name === name)
 
@@ -62,6 +63,24 @@ export default defineCommand({
                     padding: [0, 0, 0, 0],
                 }
             )
+        }
+
+        if (plugins.length) {
+            ui.div('Plugins:')
+
+            for (const plugin of plugins) {
+                ui.div(
+                    {
+                        text: plugin.name,
+                        width: 30,
+                        padding: [0, 4, 0, 4],
+                    },
+                    {
+                        text: plugin.description || '',
+                        padding: [0, 0, 0, 0],
+                    }
+                )
+            }
         }
 
         console.log(ui.toString())

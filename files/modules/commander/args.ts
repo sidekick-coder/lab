@@ -12,7 +12,7 @@ export function defineArgs<T extends ArgDefinitionRecord>(args: T): T {
 }
 
 export function useArgs<T extends ArgDefinitionRecord>(definition: T) {
-    const args = inject<string[]>('args').slice()
+    const args = inject<string[]>('commander:args').slice()
     const { _ } = minimist(args)
 
     const result = {} as any
