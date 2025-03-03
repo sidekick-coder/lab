@@ -51,7 +51,11 @@ export default defineCommand({
 
         ui.div('Commands:')
 
-        for (const command of commands.toSorted((a, b) => a.name.localeCompare(b.name))) {
+        const uncategorized = commands
+            .filter((command) => !command.categories?.length)
+            .toSorted((a, b) => a.name.localeCompare(b.name))
+
+        for (const command of uncategorized) {
             ui.div(
                 {
                     text: command.name,
@@ -65,8 +69,42 @@ export default defineCommand({
             )
         }
 
+        const categories = commands
+            .filter((command) => command.categories?.length)
+            .map((command) => command.categories)
+            .flat()
+            .filter((value, index, self) => self.indexOf(value) === index)
+
+        for (const category of categories) {
+            const categoryCommands = commands
+                .filter((c) => c.categories?.includes(category))
+                .toSorted((a, b) => a.name.localeCompare(b.name))
+
+            ui.div({
+                text: category,
+                padding: [1, 0, 1, 0],
+            })
+
+            for (const command of categoryCommands) {
+                ui.div(
+                    {
+                        text: command.name,
+                        width: 30,
+                        padding: [0, 4, 0, 4],
+                    },
+                    {
+                        text: command.description || '',
+                        padding: [0, 0, 0, 0],
+                    }
+                )
+            }
+        }
+
         if (plugins.length) {
-            ui.div('Plugins:')
+            ui.div({
+                text: 'Plugins:',
+                padding: [1, 0, 1, 0],
+            })
 
             for (const plugin of plugins) {
                 ui.div(

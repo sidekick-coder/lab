@@ -11,11 +11,11 @@ require('dotenv').config({
 
 const isDev = process.env.NODE_ENV === 'development'
 
-if (isDev) {
+if (!isDev) {
     require('./dist/index.js')
 }
 
-if (!isDev) {
+if (isDev) {
     register({
         tsconfig: path.join(import.meta.dirname, 'tsconfig.json'),
     })

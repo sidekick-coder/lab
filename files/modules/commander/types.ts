@@ -1,10 +1,13 @@
 import type { SourceOptions } from '@files/modules/sources/types.js'
 import type { ArgDefinitionRecord } from './args.js'
+import type { FlagDefinitionRecord } from './flags.js'
 
 export interface Command {
     name: string
     description?: string
+    categories?: string[]
     args?: ArgDefinitionRecord
+    flags?: FlagDefinitionRecord
     execute(): Promise<any> | void
 }
 
