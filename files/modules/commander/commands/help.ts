@@ -10,6 +10,7 @@ export default defineCommand({
     async execute() {
         const commands = inject<Command[]>('commander:commands')
         const plugins = inject<Command[]>('commander:plugins')
+        const binName = inject<string>('commander:binName') || 'node index.js'
         const [name] = inject<string[]>('commander:args')
 
         const command = commands.find((command) => command.name === name)
@@ -18,7 +19,7 @@ export default defineCommand({
 
         if (command) {
             ui.div({
-                text: `Usage: lab ${command.name} [ARGS] [ARG...]`,
+                text: `Usage: ${binName} ${command.name} [ARGS] [ARG...]`,
                 padding: [1, 0, 1, 0],
             })
 
@@ -45,7 +46,7 @@ export default defineCommand({
         }
 
         ui.div({
-            text: 'Usage: lab [COMMAND] [OPTIONS]',
+            text: `Usage: ${binName} [COMMAND] [OPTIONS]`,
             padding: [1, 0, 1, 0],
         })
 

@@ -12,6 +12,7 @@ export interface Command {
 }
 
 export interface CommanderConfig {
+    binName?: string
     sources?: SourceOptions
 }
 

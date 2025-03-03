@@ -19,6 +19,7 @@ export function createCommander(payload: CommanderConfig) {
     const plugins: Plugin[] = []
     const filesystem = createFilesystem()
     const resolve = filesystem.path.resolve
+    const binName = payload.binName
 
     const options = validate(payload, (v) =>
         v.object({
@@ -127,6 +128,7 @@ export function createCommander(payload: CommanderConfig) {
         ctx.provide('commander:commands', commands)
         ctx.provide('commander:plugins', plugins)
         ctx.provide('commander:args', newArgs.slice(1))
+        ctx.provide('commander:binName', binName)
 
         const [response, error] = await tryCatch(() => run(name))
 
