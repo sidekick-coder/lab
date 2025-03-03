@@ -10,6 +10,7 @@ interface Options {
 export function defineBinPlugin(options: Options) {
     return definePlugin({
         name: options.name,
+        type: 'execute',
         execute(args) {
             return new Promise<void>((resolve, reject) => {
                 const allArgs: string[] = []
