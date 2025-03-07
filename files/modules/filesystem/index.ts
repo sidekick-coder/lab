@@ -8,3 +8,5 @@ export * from './createPathFake.js'
 
 export * from './createFilesystem.js'
 export * from './createFilesystemFake.js'
+
+export * from './injections.js'

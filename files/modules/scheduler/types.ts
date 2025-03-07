@@ -1,7 +1,7 @@
 import type { SourceOptions } from '../sources/types.js'
 
 export interface RoutineDefinition {
-    name?: string
+    name: string
     description?: string
     interval: string
     execute(): Promise<any>

@@ -1,6 +1,5 @@
 import { shell } from '@files/utils/shell.js'
 import chalk from 'chalk'
-import { createFilesystem } from '../filesystem/createFilesystem.js'
 
 export interface RCloneExludeOptions {
     folder?: string[]
@@ -15,13 +14,8 @@ export interface RCloneConfig {
 
 export type RCloneInstance = ReturnType<typeof createRCloneInstance>
 
-export function createRCloneInstance(config: RCloneConfig | RCloneConfig[]) {
-    const filesystem = createFilesystem()
-    const join = filesystem.path.join
-
-    const configs = Array.isArray(config) ? config : [config]
-
-    async function raw(action: string, args: string[], options: Record<string, any> = {}) {
+export function createRCloneInstance() {
+    async function run(action: string, args: string[], options: Record<string, any> = {}) {
         const bin = 'rclone'
         const all = [] as string[]
 
@@ -66,59 +60,7 @@ export function createRCloneInstance(config: RCloneConfig | RCloneConfig[]) {
         await command.ready
     }
 
-    async function run(action: string, options: Record<string, any> = {}) {
-        const { folder, ...rest } = options
-
-        const systemFolders = [
-            '$RECYCLE.BIN',
-            'System Volume Information',
-            'lost+found',
-            'Recovery',
-        ]
-
-        const defaultExcludes = [
-            'node_modules/**',
-            'dist/**',
-            '.git/**',
-            '.cache/**',
-            '*.{gdoc,gslides,gsheet}',
-            '*desktop.ini',
-        ]
-
-        for await (const config of configs) {
-            const directories = await filesystem.readdir(config.directory, {
-                onlyDirectories: true,
-            })
-
-            for await (const directory of directories) {
-                if (systemFolders.includes(directory)) continue
-
-                if (folder && !folder.includes(directory)) {
-                    continue
-                }
-
-                const args = [join(config.directory, directory), `${config.remote}:${directory}`]
-
-                const allExcludes = defaultExcludes.slice()
-
-                if (config.exclude?.pattern) {
-                    allExcludes.push(...config.exclude.pattern)
-                }
-
-                const flags = {
-                    ...rest,
-                    exclude: allExcludes,
-                    color: 'NEVER',
-                }
-
-                await raw(action, args, flags)
-            }
-        }
-    }
-
     return {
-        configs,
-        raw,
         run,
     }
 }

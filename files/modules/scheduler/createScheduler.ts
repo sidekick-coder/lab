@@ -1,4 +1,4 @@
-import type { Routine, SchedulerConfig } from './types.js'
+import type { Routine, RoutineDefinition, SchedulerConfig } from './types.js'
 import { schema as sources } from '@files/modules/sources/index.js'
 import { date } from '@files/utils/date.js'
 import { createFilesystem } from '../filesystem/createFilesystem.js'
@@ -9,19 +9,40 @@ export type Scheduler = ReturnType<typeof createScheduler>
 export function createScheduler(payload: SchedulerConfig) {
     const filesystem = createFilesystem()
     const resolve = filesystem.path.resolve
+    const dirname = filesystem.path.dirname
     const routines: Routine[] = []
 
     const options = validate(payload, (v) =>
         v.object({
             sources: v.optional(sources()),
-            filename: v.optional(v.string(), resolve(process.argv[1], 'routines.json')),
+            filename: v.optional(v.string(), resolve(dirname(process.argv[1]), 'routines.json')),
         })
     )
-    function add(routine: Routine) {
+
+    const config = filesystem.readSync.json(options.filename, {
+        default: {
+            last_update: date.now(),
+            routines: [],
+        },
+    })
+
+    function add(defintion: RoutineDefinition) {
+        const routine = {
+            name: defintion.name,
+            next_run: date.now(),
+            ...defintion,
+        }
+
         const exists = routines.some((r) => r.name === routine.name)
 
         if (exists) {
             return
+        }
+
+        const saved = config.routines.find((r: any) => r.name === routine.name)
+
+        if (saved) {
+            routine.next_run = saved.next_run
         }
 
         routines.push(routine)
