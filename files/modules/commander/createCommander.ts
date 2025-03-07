@@ -14,6 +14,8 @@ interface AddOptions {
     prefix?: string
 }
 
+export type Commander = ReturnType<typeof createCommander>
+
 export function createCommander(payload: CommanderConfig) {
     const commands: Command[] = []
     const plugins: Plugin[] = []
