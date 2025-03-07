@@ -1,16 +1,16 @@
-import { promises as fs } from 'fs'
-import { resolve } from 'path'
+import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
 import { pathToFileURL } from 'url'
-import { filesystem } from './filesystem.ts'
 
 export async function importAll(path: string, options?: any) {
+    const filesystem = createFilesystem()
+    const resolve = filesystem.path.resolve
     const exists = await filesystem.exists(path)
 
     if (!exists) {
         return {}
     }
 
-    const files = await fs.readdir(path)
+    const files = await filesystem.readdir(path)
 
     const result = {}
 
@@ -20,6 +20,7 @@ export async function importAll(path: string, options?: any) {
         }
 
         const url = pathToFileURL(resolve(path, file))
+
         const module = await import(url.href)
 
         result[file] = module

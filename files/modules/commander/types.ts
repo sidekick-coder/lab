@@ -16,15 +16,6 @@ export interface CommanderConfig {
     sources?: SourceOptions
 }
 
-export interface Commander {
-    commands: Command[]
-    load(): Promise<void>
-    add(command: Command): void
-    addDir(dir: string): void
-    run(name: string, options: Record<string, any>): Promise<any>
-    handle(args: string[]): Promise<any>
-}
-
 export interface PluginExecute {
     name: string
     type: 'execute'

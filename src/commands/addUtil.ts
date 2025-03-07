@@ -1,4 +1,5 @@
 import type { Config } from '@/types.js'
+import { copyFile } from '@/utils/copyFile.js'
 import { defineArgs, useArgs } from '@files/modules/commander/args.js'
 import { defineCommand } from '@files/modules/commander/defineCommand.js'
 import { defineFlags, useFlags } from '@files/modules/commander/flags.js'
@@ -40,7 +41,7 @@ export default defineCommand({
             return
         }
 
-        filesystem.copySync(source, target)
+        copyFile(source, target)
 
         console.log(`Added ${name} utility command`)
     },

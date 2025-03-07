@@ -51,7 +51,7 @@ export default defineCommand({
             const src = resolve(source, relativeName)
             const trg = resolve(target, relativeName)
 
-            copyFile(src, trg, { baseDir: config.baseDir })
+            copyFile(src, trg, config)
 
             console.log(`File ${relative(target, trg)} added`)
         }
