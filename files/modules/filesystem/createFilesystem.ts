@@ -1,6 +1,6 @@
 import { tryCatch } from '@files/utils/tryCatch.js'
 import { YAML } from '@files/utils/yaml.js'
-import type { FilesystemOptions } from './types.js'
+import type { FilesystemOptions, ReaddirOptions } from './types.js'
 import { createFsNode } from './createFsNode.js'
 import { createPathNode } from './createPathNode.js'
 import type { ValidatePayload, ValidateResult } from '../validator/validate.js'
@@ -136,12 +136,12 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         return error ? options?.default || null : yml
     }
 
-    async function readdir(filepath: string) {
-        return fs.readdir(filepath)
+    async function readdir(filepath: string, options?: ReaddirOptions) {
+        return fs.readdir(filepath, options)
     }
 
-    function readdirSync(filepath: string) {
-        return fs.readdirSync(filepath)
+    function readdirSync(filepath: string, options?: ReaddirOptions) {
+        return fs.readdirSync(filepath, options)
     }
 
     function glob(pattern: string) {

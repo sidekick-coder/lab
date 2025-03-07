@@ -39,16 +39,48 @@ export function createFsNode(): FilesystemOptionsFs {
         return new Uint8Array(content)
     }
 
-    const readdir: FilesystemOptionsFs['readdir'] = async (path: string) => {
-        const [files, error] = await tryCatch(() => fs.promises.readdir(path))
+    const readdir: FilesystemOptionsFs['readdir'] = async (path, options) => {
+        const [files, error] = await tryCatch(() =>
+            fs.promises.readdir(path, {
+                withFileTypes: true,
+            })
+        )
 
-        return error ? [] : files
+        if (error) {
+            return []
+        }
+
+        if (options?.onlyFiles) {
+            return files.filter((file) => file.isFile()).map((file) => file.name)
+        }
+
+        if (options?.onlyDirectories) {
+            return files.filter((file) => file.isDirectory()).map((file) => file.name)
+        }
+
+        return files.map((file) => file.name)
     }
 
-    const readdirSync: FilesystemOptionsFs['readdirSync'] = (path: string) => {
-        const [files, error] = tryCatch.sync(() => fs.readdirSync(path))
+    const readdirSync: FilesystemOptionsFs['readdirSync'] = (path: string, options) => {
+        const [files, error] = tryCatch.sync(() =>
+            fs.readdirSync(path, {
+                withFileTypes: true,
+            })
+        )
 
-        return error ? [] : files
+        if (error) {
+            return []
+        }
+
+        if (options?.onlyFiles) {
+            return files.filter((file) => file.isFile()).map((file) => file.name)
+        }
+
+        if (options?.onlyDirectories) {
+            return files.filter((file) => file.isDirectory()).map((file) => file.name)
+        }
+
+        return files.map((file) => file.name)
     }
 
     const glob: FilesystemOptionsFs['glob'] = async (pattern: string) => {

@@ -1,3 +1,8 @@
+export interface ReaddirOptions {
+    onlyFiles?: boolean
+    onlyDirectories?: boolean
+}
+
 export interface FilesystemOptionsFs {
     exists: (path: string) => Promise<boolean>
     existsSync: (path: string) => boolean
@@ -5,8 +10,8 @@ export interface FilesystemOptionsFs {
     read: (path: string) => Promise<Uint8Array | null>
     readSync: (path: string) => Uint8Array | null
 
-    readdir: (path: string) => Promise<string[]>
-    readdirSync: (path: string) => string[]
+    readdir: (path: string, options?: ReaddirOptions) => Promise<string[]>
+    readdirSync: (path: string, options?: ReaddirOptions) => string[]
 
     glob: (pattern: string) => Promise<string[]>
     globSync: (pattern: string) => string[]
