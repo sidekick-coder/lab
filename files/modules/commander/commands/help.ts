@@ -3,6 +3,7 @@ import { defineCommand } from '../defineCommand.js'
 import type { Command, Plugin, CommanderConfig, Manifest } from '@files/modules/commander/types.js'
 import { createRequire } from 'module'
 import { useFilesystem } from '@files/modules/filesystem/injections.js'
+import chalk from 'chalk'
 
 const require = createRequire(import.meta.url)
 
@@ -13,6 +14,7 @@ export default defineCommand({
         const filesystem = useFilesystem()
         const options = inject<CommanderConfig>('commander:options')
         const [name] = inject<string[]>('commander:args')
+        const ui = require('cliui')({})
 
         const manifest = filesystem.readSync.json(options.manifest) as Manifest
         const binName = options.binName
@@ -24,8 +26,6 @@ export default defineCommand({
 
         const commands = manifest.commands as Command[]
         const plugins = manifest.plugins as Plugin[]
-
-        const ui = require('cliui')({})
 
         const command = manifest.commands.find((c) => c.name === name)
 
@@ -59,28 +59,20 @@ export default defineCommand({
 
         ui.div({
             text: `Usage: ${binName} [COMMAND] [OPTIONS]`,
-            padding: [1, 0, 1, 0],
         })
 
-        ui.div('Commands:')
+        ui.div({
+            text: `Mode: ${process.env.NODE_ENV === 'development' ? 'development' : 'production'}`,
+            //padding: [0, 0, 0, 0],
+        })
+
+        const sections = [] as { title: string; prefix?: string; commands: Command[] }[]
 
         const uncategorized = commands
             .filter((command) => !command.categories?.length)
             .toSorted((a, b) => a.name.localeCompare(b.name))
 
-        for (const command of uncategorized) {
-            ui.div(
-                {
-                    text: command.name,
-                    width: 50,
-                    padding: [0, 4, 0, 4],
-                },
-                {
-                    text: command.description || '',
-                    padding: [0, 0, 0, 0],
-                }
-            )
-        }
+        sections.push({ title: 'Commands', commands: uncategorized })
 
         const categories = commands
             .filter((command) => command.categories?.length)
@@ -93,49 +85,64 @@ export default defineCommand({
                 .filter((c) => c.categories?.includes(category))
                 .toSorted((a, b) => a.name.localeCompare(b.name))
 
+            sections.push({
+                title: category,
+                commands: categoryCommands,
+            })
+        }
+
+        // execute plugins
+        for (const p of plugins) {
+            if (p.type === 'execute' && p.manifest) {
+                const pluginCommands: Command[] = p.manifest?.commands || []
+
+                const pluginUncategorized = pluginCommands.filter((c) => !c.categories?.length)
+                const categories = pluginCommands
+                    .filter((c) => c.categories?.length)
+                    .map((c) => c.categories)
+                    .flat()
+                    .filter((value, index, self) => self.indexOf(value) === index)
+
+                const prefix = `${binName} -p ${p.name} `
+
+                sections.push({
+                    title: `[${p.name}] Commands`,
+                    commands: pluginUncategorized,
+                    prefix,
+                })
+
+                for (const category of categories) {
+                    const categoryCommands = pluginCommands.filter((c) =>
+                        c.categories?.includes(category)
+                    )
+
+                    sections.push({
+                        title: `[${p.name}] ${category}`,
+                        commands: categoryCommands,
+                        prefix,
+                    })
+                }
+            }
+        }
+
+        for (const s of sections) {
             ui.div({
-                text: category,
-                padding: [1, 0, 1, 0],
+                text: chalk.cyan(s.title),
+                padding: [1, 0, 0, 0],
             })
 
-            for (const command of categoryCommands) {
+            for (const command of s.commands) {
                 ui.div(
                     {
-                        text: command.name,
+                        text: `${s.prefix || ''}${command.name}`,
                         width: 50,
-                        padding: [0, 4, 0, 4],
+                        padding: [0, 2, 0, 2],
                     },
                     {
                         text: command.description || '',
                         padding: [0, 0, 0, 0],
                     }
                 )
-            }
-        }
-
-        // execute plugins
-        for (const p of plugins) {
-            if (p.type === 'execute' && p.manifest) {
-                ui.div({
-                    text: `[Plugin]: ${p.name}`,
-                    padding: [1, 0, 1, 0],
-                })
-
-                const pluginCommands = p.manifest?.commands || []
-
-                for (const c of pluginCommands) {
-                    ui.div(
-                        {
-                            text: `${binName} -p ${p.name} ${c.name}`,
-                            width: 50,
-                            padding: [0, 4, 0, 4],
-                        },
-                        {
-                            text: c.description || '',
-                            padding: [0, 0, 0, 0],
-                        }
-                    )
-                }
             }
         }
 
