@@ -12,13 +12,15 @@ export interface Command {
 }
 
 export interface CommanderConfig {
-    binName?: string
-    sources?: SourceOptions
+    binName: string
+    sources: SourceOptions
+    manifest: string
 }
 
 export interface PluginExecute {
     name: string
     type: 'execute'
+    manifest?: any
     execute(options: string[]): Promise<any>
 }
 
@@ -27,6 +29,16 @@ export interface PluginCommandList {
     prefix?: string
     type: 'command-list'
     commands: Command[]
+}
+
+export interface ManifestPlugin extends PluginExecute {
+    manifest: Manifest
+}
+
+export interface Manifest {
+    name: string
+    commands: Omit<Command, 'execute'>[]
+    plugins: ManifestPlugin[]
 }
 
 export type Plugin = PluginExecute | PluginCommandList

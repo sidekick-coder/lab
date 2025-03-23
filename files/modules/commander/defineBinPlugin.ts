@@ -5,12 +5,14 @@ interface Options {
     name: string
     bin: string
     args?: string[]
+    manifest?: string
 }
 
 export function defineBinPlugin(options: Options) {
     return definePlugin({
         name: options.name,
         type: 'execute',
+        manifest: options.manifest,
         execute(args) {
             return new Promise<void>((resolve, reject) => {
                 const allArgs: string[] = []

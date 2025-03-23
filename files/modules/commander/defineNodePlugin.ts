@@ -3,6 +3,7 @@ import { defineBinPlugin } from './defineBinPlugin.js'
 interface Options {
     name: string
     path: string
+    manifest?: string
 }
 
 export function defineNodePlugin(options: Options) {
@@ -10,5 +11,6 @@ export function defineNodePlugin(options: Options) {
         name: options.name,
         bin: 'node',
         args: [options.path],
+        manifest: options.manifest,
     })
 }

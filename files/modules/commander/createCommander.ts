@@ -16,7 +16,7 @@ interface AddOptions {
 
 export type Commander = ReturnType<typeof createCommander>
 
-export function createCommander(payload: CommanderConfig) {
+export function createCommander(payload: Partial<CommanderConfig> = {}) {
     const commands: Command[] = []
     const plugins: Plugin[] = []
     const filesystem = createFilesystem()
@@ -25,7 +25,9 @@ export function createCommander(payload: CommanderConfig) {
 
     const options = validate(payload, (v) =>
         v.object({
+            binName: v.optional(v.string(), 'node index.js'),
             sources: v.optional(sources()),
+            manifest: v.optional(v.string(), resolve(process.cwd(), 'manifest.json')),
         })
     )
 
@@ -131,6 +133,7 @@ export function createCommander(payload: CommanderConfig) {
         ctx.provide('commander:plugins', plugins)
         ctx.provide('commander:args', newArgs.slice(1))
         ctx.provide('commander:binName', binName)
+        ctx.provide('commander:options', options)
 
         const [response, error] = await tryCatch(() => run(name))
 
