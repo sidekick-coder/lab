@@ -5,7 +5,7 @@ import type { FlagDefinitionRecord } from './flags.js'
 export interface Command {
     name: string
     description?: string
-    categories?: string[]
+    category?: string
     args?: ArgDefinitionRecord
     flags?: FlagDefinitionRecord
     execute(): Promise<any> | void

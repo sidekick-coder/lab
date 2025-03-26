@@ -7,6 +7,7 @@ import * as ctx from '@files/modules/context/index.js'
 import minimist from 'minimist'
 import type { Config } from './schemas.js'
 import { config } from './schemas.js'
+import { createEmitter } from '@files/modules/emitter/index.js'
 
 const require = createRequire(import.meta.url)
 
@@ -17,6 +18,7 @@ export function createCommander(payload: Partial<Config> = {}) {
     const plugins: Plugin[] = []
     const options = validate(payload, config)
     const subCommanders = new Map<string, Commander>()
+    const emitter = createEmitter()
 
     function add(command: Command) {
         const name = command.name
@@ -51,7 +53,13 @@ export function createCommander(payload: Partial<Config> = {}) {
             throw new Error(`Command not found: ${name}`)
         }
 
-        return await command.execute()
+        emitter.emit('commander:command:before', { command, plugins, options })
+
+        const result = await command.execute()
+
+        emitter.emit('commander:command:after', { command, plugins, options })
+
+        return result
     }
 
     async function runPlugin(name: string, args: string[]) {
@@ -69,15 +77,20 @@ export function createCommander(payload: Partial<Config> = {}) {
     }
 
     async function handle(args: string[]) {
-        const [first] = args
+        const { _, plugin, ...rest } = minimist(args, { alias: { p: 'plugin' } })
+
+        const [first] = _
 
         const subCommander = subCommanders.get(first)
 
         if (subCommander) {
-            return subCommander.handle(args.slice(1))
-        }
+            const subArgs = args.slice()
+            const index = subArgs.indexOf(first)
 
-        const { _, plugin, ...rest } = minimist(args, { alias: { p: 'plugin' } })
+            subArgs.splice(index, 1) // remove the sub commander name from args
+
+            return subCommander.handle(subArgs)
+        }
 
         let newArgs = _
 
@@ -135,6 +148,8 @@ export function createCommander(payload: Partial<Config> = {}) {
 
     return {
         commands,
+        emitter,
+
         add,
         addFile,
         addPlugin,
