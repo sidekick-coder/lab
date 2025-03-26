@@ -1,42 +1,25 @@
 import { createRequire } from 'module'
 
-import type { Command, CommanderConfig, Plugin } from './types.js'
+import type { Command, Plugin } from './types.js'
 import { validate } from '@files/modules/validator/index.js'
-import { schema as sources } from '@files/modules/sources/index.js'
-import { createFilesystem } from '../filesystem/createFilesystem.js'
 import { tryCatch } from '@files/utils/tryCatch.js'
 import * as ctx from '@files/modules/context/index.js'
 import minimist from 'minimist'
+import type { Config } from './schemas.js'
+import { config } from './schemas.js'
 
 const require = createRequire(import.meta.url)
 
-interface AddOptions {
-    prefix?: string
-}
-
 export type Commander = ReturnType<typeof createCommander>
 
-export function createCommander(payload: Partial<CommanderConfig> = {}) {
+export function createCommander(payload: Partial<Config> = {}) {
     const commands: Command[] = []
     const plugins: Plugin[] = []
-    const filesystem = createFilesystem()
-    const resolve = filesystem.path.resolve
-    const binName = payload.binName
+    const options = validate(payload, config)
+    const subCommanders = new Map<string, Commander>()
 
-    const options = validate(payload, (v) =>
-        v.object({
-            binName: v.optional(v.string(), 'node index.js'),
-            sources: v.optional(sources()),
-            manifest: v.optional(v.string(), resolve(process.cwd(), 'manifest.json')),
-        })
-    )
-
-    function add(command: Command, options: AddOptions = {}) {
-        let name = command.name
-
-        if (options.prefix) {
-            name = `${options.prefix}${name}`
-        }
+    function add(command: Command) {
+        const name = command.name
 
         const exists = commands.some((command) => command.name === name)
 
@@ -50,26 +33,15 @@ export function createCommander(payload: Partial<CommanderConfig> = {}) {
         })
     }
 
-    function addFile(file: string, options: AddOptions = {}) {
+    function addFile(file: string) {
         const fileModule = require(file)
         const command = fileModule.default
-        const argsDefinition = fileModule.args
 
-        if (!command) return
-
-        if (!command.name) {
-            command.name = filesystem.path.basename(file)
-        }
-
-        if (argsDefinition) {
-            command.args = argsDefinition
-        }
-
-        add(command, options)
+        add(command)
     }
 
-    function addDir(dir: string, options: AddOptions = {}) {
-        filesystem.readdirSync(dir).forEach((f) => addFile(resolve(dir, f), options))
+    function addSubCommander(name: string, commander: Commander) {
+        subCommanders.set(name, commander)
     }
 
     async function run(name: string) {
@@ -97,6 +69,14 @@ export function createCommander(payload: Partial<CommanderConfig> = {}) {
     }
 
     async function handle(args: string[]) {
+        const [first] = args
+
+        const subCommander = subCommanders.get(first)
+
+        if (subCommander) {
+            return subCommander.handle(args.slice(1))
+        }
+
         const { _, plugin, ...rest } = minimist(args, { alias: { p: 'plugin' } })
 
         let newArgs = _
@@ -124,7 +104,7 @@ export function createCommander(payload: Partial<CommanderConfig> = {}) {
         const exists = commands.some((command) => command.name === name)
 
         if (!exists) {
-            name = 'help'
+            name = options.defaultCommand
         }
 
         ctx.open()
@@ -132,7 +112,6 @@ export function createCommander(payload: Partial<CommanderConfig> = {}) {
         ctx.provide('commander:commands', commands)
         ctx.provide('commander:plugins', plugins)
         ctx.provide('commander:args', newArgs.slice(1))
-        ctx.provide('commander:binName', binName)
         ctx.provide('commander:options', options)
 
         const [response, error] = await tryCatch(() => run(name))
@@ -150,25 +129,16 @@ export function createCommander(payload: Partial<CommanderConfig> = {}) {
         plugins.push(plugin)
 
         if (plugin.type === 'command-list') {
-            plugin.commands.forEach((c) =>
-                add(c, {
-                    prefix: plugin.prefix,
-                })
-            )
+            plugin.commands.forEach((c) => add(c))
         }
     }
-
-    // commander commands
-    addDir(resolve(import.meta.dirname, 'commands'))
-
-    options.sources.forEach((s) => addFile(s))
 
     return {
         commands,
         add,
         addFile,
-        addDir,
         addPlugin,
+        addSubCommander,
         run,
         handle,
     }

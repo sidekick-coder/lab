@@ -1,6 +1,5 @@
 import { basename, dirname } from 'path'
-
-import { FilesystemOptionsFs } from './types.js'
+import type { FilesystemOptionsFs } from './types.js'
 
 interface EntryFile {
     name: string
@@ -33,6 +32,7 @@ export function createFsFake(): FilesystemOptionsFs {
 
         return result
     }
+
     const exists: FilesystemOptionsFs['exists'] = async (path: string) => {
         return existsSync(path)
     }
@@ -72,6 +72,22 @@ export function createFsFake(): FilesystemOptionsFs {
     }
     const readdir: FilesystemOptionsFs['readdir'] = async (path: string) => {
         return readdirSync(path)
+    }
+
+    const globSync: FilesystemOptionsFs['globSync'] = (pattern: string) => {
+        const regexPattern = pattern.replace(/\*/g, '.*')
+
+        const regex = new RegExp(`^${regexPattern}$`)
+
+        const result = Array.from(entries.values())
+            .filter((entry) => regex.test(entry.path))
+            .map((entry) => entry.path)
+
+        return result
+    }
+
+    const glob: FilesystemOptionsFs['glob'] = async (pattern: string) => {
+        return globSync(pattern)
     }
 
     const writeSync: FilesystemOptionsFs['writeSync'] = (path: string, content: Uint8Array) => {
@@ -115,6 +131,14 @@ export function createFsFake(): FilesystemOptionsFs {
         })
     }
 
+    const copySync: FilesystemOptionsFs['copySync'] = (src: string, dest: string) => {
+        // implementation for copying files or directories
+    }
+
+    const copy: FilesystemOptionsFs['copy'] = async (src: string, dest: string) => {
+        // implementation for copying files or directories
+    }
+
     const removeSync: FilesystemOptionsFs['removeSync'] = (path: string) => {
         const entry = entries.get(path)
 
@@ -152,11 +176,17 @@ export function createFsFake(): FilesystemOptionsFs {
         readdir,
         readdirSync,
 
+        glob,
+        globSync,
+
         write,
         writeSync,
 
         mkdir,
         mkdirSync,
+
+        copy,
+        copySync,
 
         remove,
         removeSync,

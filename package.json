@@ -15,7 +15,8 @@
   },
   "scripts": {
     "lint": "eslint",
-    "build": "tsup"
+    "build": "tsup",
+    "test": "vitest"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.2.4",
@@ -30,6 +31,8 @@
     "qs": "^6.14.0",
     "undici": "^7.3.0",
     "valibot": "^1.0.0-rc.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.9",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },

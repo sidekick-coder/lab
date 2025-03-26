@@ -182,6 +182,12 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         await write.text(filename, JSON.stringify(content, null, 2), options)
     }
 
+    write.yaml = async function (filename: string, content: any, options?: any) {
+        const yamlContent = YAML.stringify(content)
+
+        await write.text(filename, yamlContent, options)
+    }
+
     function writeSync(filename: string, content: Uint8Array, options?: any) {
         if (options?.recursive) {
             const parent = path.dirname(filename)
@@ -198,6 +204,12 @@ export function createFilesystem(options: FilesystemOptions = {}) {
 
     writeSync.json = function (filename: string, content: any, options?: any) {
         writeSync.text(filename, JSON.stringify(content, null, 2), options)
+    }
+
+    writeSync.yaml = function (filename: string, content: any, options?: any) {
+        const yamlContent = YAML.stringify(content)
+
+        writeSync.text(filename, yamlContent, options)
     }
 
     async function mkdir(filepath: string, options?: any) {

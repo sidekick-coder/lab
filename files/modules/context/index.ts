@@ -40,12 +40,14 @@ export function close() {
     opened.pop()
 }
 
-export function provide(name: string, value: any) {
+export function provide(name: string, value: any, context?: string) {
     let item = state.get(name)
+
+    const current = context || opened.at(-1)
 
     if (!item) {
         item = {
-            current: opened.at(-1),
+            current: current,
             values: [],
         }
     }
@@ -55,8 +57,12 @@ export function provide(name: string, value: any) {
     state.set(name, item)
 }
 
-export function inject<T = any>(name: string): T {
+export function inject<T = any>(name: string, defaultValue?: T): T {
     const item = state.get(name)
+
+    if (!item && defaultValue !== undefined) {
+        return defaultValue
+    }
 
     if (!item) {
         throw new ContextError(`Injection failed, "${name}" not found in context`)

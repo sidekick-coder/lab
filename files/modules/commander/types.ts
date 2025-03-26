@@ -15,6 +15,7 @@ export interface CommanderConfig {
     binName: string
     sources: SourceOptions
     manifest: string
+    defaultCommand?: string
 }
 
 export interface PluginExecute {

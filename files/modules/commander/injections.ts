@@ -10,3 +10,13 @@ export function provideCommander(commander: Commander) {
 export function useCommander() {
     return inject<Commander>(key)
 }
+
+const manifestKey = 'commander:manifest'
+
+export function provideManifest(manifest: any) {
+    provide(manifestKey, manifest)
+}
+
+export function useManifest() {
+    return inject<any>(manifestKey, {})
+}
