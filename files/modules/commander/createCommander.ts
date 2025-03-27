@@ -11,7 +11,7 @@ import { createEmitter } from '@files/modules/emitter/index.js'
 
 const require = createRequire(import.meta.url)
 
-export type Commander = ReturnType<typeof createCommander>
+export interface Commander extends ReturnType<typeof createCommander> {}
 
 export function createCommander(payload: Partial<Config> = {}) {
     const commands: Command[] = []
@@ -20,19 +20,21 @@ export function createCommander(payload: Partial<Config> = {}) {
     const subCommanders = new Map<string, Commander>()
     const emitter = createEmitter()
 
-    function add(command: Command) {
-        const name = command.name
+    function add(...args: Command[]) {
+        for (const command of args) {
+            const name = command.name
 
-        const exists = commands.some((command) => command.name === name)
+            const exists = commands.some((command) => command.name === name)
 
-        if (exists) {
-            return
+            if (exists) {
+                return
+            }
+
+            commands.push({
+                ...command,
+                name: name,
+            })
         }
-
-        commands.push({
-            ...command,
-            name: name,
-        })
     }
 
     function addFile(file: string) {
@@ -42,8 +44,22 @@ export function createCommander(payload: Partial<Config> = {}) {
         add(command)
     }
 
+    function getSubcommaners() {
+        return subCommanders
+    }
+
     function addSubCommander(name: string, commander: Commander) {
         subCommanders.set(name, commander)
+    }
+
+    function addToSubCommander(name: string, command: Command) {
+        const subCommander = subCommanders.get(name)
+
+        if (!subCommander) {
+            throw new Error(`Sub commander not found: ${name}`)
+        }
+
+        subCommander.add(command)
     }
 
     async function run(name: string) {
@@ -53,11 +69,11 @@ export function createCommander(payload: Partial<Config> = {}) {
             throw new Error(`Command not found: ${name}`)
         }
 
-        emitter.emit('commander:command:before', { command, plugins, options })
+        emitter.emit('command:before', { command, plugins, options })
 
         const result = await command.execute()
 
-        emitter.emit('commander:command:after', { command, plugins, options })
+        emitter.emit('command:after', { command, plugins, options })
 
         return result
     }
@@ -149,11 +165,14 @@ export function createCommander(payload: Partial<Config> = {}) {
     return {
         commands,
         emitter,
+        options,
 
         add,
         addFile,
         addPlugin,
         addSubCommander,
+        addToSubCommander,
+        getSubcommaners,
         run,
         handle,
     }
