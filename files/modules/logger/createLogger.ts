@@ -1,7 +1,7 @@
 import winston from 'winston'
-import { createConsoleTransport } from './createConsoleTransport.ts'
-import { createFileTransport } from './createFileTransport.ts'
-import type { LoggerConfig } from './types.ts'
+import { createConsoleTransport } from './createConsoleTransport.js'
+import { createFileTransport } from './createFileTransport.js'
+import type { LoggerConfig } from './types.js'
 
 export function createLogger(config: LoggerConfig) {
     const transports: winston.transport[] = [createConsoleTransport()]

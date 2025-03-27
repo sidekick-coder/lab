@@ -1,6 +1,6 @@
 import winston from 'winston'
 import chalk from 'chalk'
-import { printObject } from '../utils/index.ts'
+import { printObject } from './printObject.js'
 
 const { format } = winston
 
