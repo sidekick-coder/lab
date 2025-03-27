@@ -1,4 +1,4 @@
-import { FilesystemOptionsPath } from './types.js'
+import type { FilesystemOptionsPath } from './types.js'
 
 export function createPathFake(): FilesystemOptionsPath {
     function parts(...args: string[]) {
@@ -67,8 +67,23 @@ export function createPathFake(): FilesystemOptionsPath {
         return parts(args).slice(-1)[0]
     }
 
+    function relative(from: string, to: string): string {
+        const fromParts = parts(from)
+        const toParts = parts(to)
+
+        let i = 0
+        while (i < fromParts.length && i < toParts.length && fromParts[i] === toParts[i]) {
+            i++
+        }
+
+        const relativePath = '../'.repeat(fromParts.length - i) + toParts.slice(i).join('/')
+
+        return relativePath
+    }
+
     return {
         resolve,
+        relative,
         join,
         dirname,
         basename,
