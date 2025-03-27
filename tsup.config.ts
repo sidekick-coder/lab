@@ -8,6 +8,6 @@ export default defineConfig({
     splitting: true,
     clean: true,
     treeshake: true,
-    external: ['fast-glob', 'yaml'],
+    external: ['fast-glob', 'yaml', 'chalk'],
     platform: 'node',
 })

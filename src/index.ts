@@ -1,8 +1,11 @@
+import { createCommanderHelp } from '@files/modules/commander/createCommanderHelp.js'
 import { createCommander } from '@files/modules/commander/index.js'
 import { provide } from '@files/modules/context/index.js'
 import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
 import { merge } from 'lodash-es'
 import { createRequire } from 'module'
+import addModule from './commands/addModule.js'
+import addUtil from './commands/addUtil.js'
 
 const require = createRequire(import.meta.url)
 
@@ -21,10 +24,8 @@ if (filesystem.existsSync(resolve(process.cwd(), 'lab.config.js'))) {
 
 provide('config', config)
 
-const commander = createCommander({
-    sources: {
-        dirs: [resolve(import.meta.dirname, 'commands')],
-    },
-})
+const commander = createCommander()
+
+commander.add(addModule, addUtil, createCommanderHelp(commander))
 
 commander.handle(process.argv.slice(2))
