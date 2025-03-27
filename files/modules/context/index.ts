@@ -3,7 +3,9 @@ interface Item {
     values: any[]
 }
 
-const state = new Map<string, Item>()
+globalThis.__lab_context__ = globalThis.__lab_context__ || new Map<string, any>()
+
+const state = globalThis.__lab_context__ as Map<string, Item>
 
 const opened = ['global'] as string[]
 
