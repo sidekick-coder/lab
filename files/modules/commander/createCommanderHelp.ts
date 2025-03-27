@@ -5,9 +5,10 @@ import { defineCommand } from './defineCommand.js'
 interface Options {
     title?: string
     description?: string
+    extraSections?: Section[]
 }
 
-export function createHelpCommandFromCommander(commander: Commander, options: Options = {}) {
+export function createCommanderHelp(commander: Commander, options: Options = {}) {
     return defineCommand({
         name: 'help',
         description: 'Display help information for commands',
@@ -48,6 +49,10 @@ export function createHelpCommandFromCommander(commander: Commander, options: Op
 
             const title = options.title || ''
             const description = options.description
+
+            if (options.extraSections) {
+                sections.push(...options.extraSections)
+            }
 
             const text = createHelpText({
                 title,
