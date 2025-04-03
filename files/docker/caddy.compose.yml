@@ -1,0 +1,26 @@
+services:
+    caddy:
+        image: caddy:latest
+        container_name: caddy
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+            - "443:443/udp" # For HTTP/3 if you enable it
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile
+            - ./.volumes/caddy/data:/data # For persistent data (certificates)
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.4"
+                    memory: 400M
+    # app:
+    #     image: myapp:latest
+    #     container_name: myapp
+    #     restart: unless-stopped
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: "0.4"
+    #                 memory: 400M
