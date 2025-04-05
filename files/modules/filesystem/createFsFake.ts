@@ -16,7 +16,7 @@ interface EntryDirectory {
 
 type Entry = EntryFile | EntryDirectory
 
-export function createFsFake(): FilesystemOptionsFs {
+export function createFsFake() {
     const entries = new Map<string, Entry>()
 
     entries.set('/', {

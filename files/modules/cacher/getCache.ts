@@ -15,7 +15,11 @@ export async function getCache(config: CacheConfig, key: string, format?: 'json'
     const optionsFilename = filesystem.path.join(path, 'options.json')
     const contentFilename = filesystem.path.join(path, 'content')
 
-    const item = await filesystem.read.json(optionsFilename)
+    const item = await filesystem.read(optionsFilename, {
+        transform: (content) => {
+            return JSON.parse(decode(content))
+        },
+    })
 
     if (!item) {
         return null

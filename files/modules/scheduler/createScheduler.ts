@@ -19,12 +19,18 @@ export function createScheduler(payload: SchedulerConfig) {
         })
     )
 
-    const config = filesystem.readSync.json(options.filename, {
-        default: {
-            last_update: date.now(),
-            routines: [],
+    let config = filesystem.readSync(options.filename, {
+        transform: (content) => {
+            return JSON.parse(new TextDecoder('utf-8').decode(content))
         },
     })
+
+    if (!config) {
+        config = {
+            last_update: date.now(),
+            routines: [],
+        }
+    }
 
     function add(defintion: RoutineDefinition) {
         const routine = {

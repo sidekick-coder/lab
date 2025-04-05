@@ -5,7 +5,9 @@ import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
 export function copyFile(source: string, target: string) {
     const config = inject<Config>('config')
     const filesystem = createFilesystem()
-    let text = filesystem.readSync.text(source)
+    let text = filesystem.readSync(source, {
+        transform: (content) => new TextDecoder('utf-8').decode(content),
+    })
 
     let modulesAlias = '@/modules'
     let utilsAlias = '@/utils'

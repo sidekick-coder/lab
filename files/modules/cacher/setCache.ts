@@ -25,7 +25,11 @@ export async function setCache(config: CacheConfig, options: CacheDefinition, pa
     const optionsFilename = filesystem.path.join(path, 'options.json')
     const contentFilename = filesystem.path.join(path, 'content')
 
-    const item = await filesystem.read.json(optionsFilename)
+    const item = await filesystem.read(optionsFilename, {
+        transform: (content) => {
+            return JSON.parse(new TextDecoder('utf-8').decode(content))
+        },
+    })
 
     item.expire_at = date.future(options.expires)
 

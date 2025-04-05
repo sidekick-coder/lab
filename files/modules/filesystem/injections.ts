@@ -1,4 +1,4 @@
-import type { Filesystem } from './createFilesystem.js'
+import { createFilesystem, type Filesystem } from './createFilesystem.js'
 import { inject, provide } from '@files/modules/context/index.js'
 
 const key = 'filesystem'
@@ -8,5 +8,5 @@ export function provideFilesystem(filesystem: Filesystem) {
 }
 
 export function useFilesystem() {
-    return inject<Filesystem>(key)
+    return inject<Filesystem>(key, createFilesystem())
 }

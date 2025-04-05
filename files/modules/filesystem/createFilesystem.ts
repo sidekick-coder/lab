@@ -5,12 +5,10 @@ import { createFsNode } from './createFsNode.js'
 import { createPathNode } from './createPathNode.js'
 import type { ValidatePayload, ValidateResult } from '../validator/validate.js'
 import { validate } from '../validator/validate.js'
+import { read as readFile, type ReadOptions } from './read.js'
+import { readSync as readFileSync, type ReadSyncOptions } from './readSync.js'
 
 export type Filesystem = ReturnType<typeof createFilesystem>
-
-export interface ReadOptions {
-    recursive?: boolean
-}
 
 export interface ReadRecordOptions extends ReadOptions {
     reviver?: (key: any, value: any) => any
@@ -46,94 +44,12 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         })
     }
 
-    async function read(filepath: string) {
-        return fs.read(filepath)
+    async function read<T extends ReadOptions>(filepath: string, options?: T) {
+        return readFile(fs, filepath, options)
     }
 
-    read.text = async function (filepath: string, options?: any) {
-        const content = await read(filepath)
-
-        if (!content) {
-            return options?.default || ''
-        }
-
-        return new TextDecoder().decode(content)
-    }
-
-    read.json = async function <T extends ReadRecordOptions>(
-        filepath: string,
-        options?: T
-    ): Promise<ReadOutput<T>> {
-        const content = await read.text(filepath)
-
-        if (!content) {
-            return (options?.default || null) as any
-        }
-
-        const [json, error] = await tryCatch(() => JSON.parse(content, options?.reviver))
-
-        if (options?.schema) {
-            return validate(options.schema, json) as any
-        }
-
-        return error ? options?.default || null : json
-    }
-
-    read.yaml = async function (filepath: string, options?: any) {
-        const content = await read.text(filepath)
-
-        if (!content) {
-            return options?.default || null
-        }
-
-        const [yml, error] = await tryCatch(() => YAML.parse(content, options?.reviver))
-
-        return error ? options?.default || null : yml
-    }
-
-    function readSync(filepath: string) {
-        return fs.readSync(filepath)
-    }
-
-    readSync.text = function (filepath: string, defaultValue: string = '') {
-        const content = readSync(filepath)
-
-        if (!content) {
-            return defaultValue
-        }
-
-        return new TextDecoder().decode(content)
-    }
-
-    readSync.json = function <T extends ReadRecordOptions>(
-        filepath: string,
-        options?: T
-    ): ReadOutput<T> {
-        const content = readSync.text(filepath)
-
-        if (!content) {
-            return (options?.default || null) as any
-        }
-
-        const [json, error] = tryCatch.sync(() => JSON.parse(content, options?.reviver))
-
-        if (options?.schema) {
-            return validate(options.schema, json) as any
-        }
-
-        return error ? options?.default || null : json
-    }
-
-    readSync.yaml = function (filepath: string, options?: any) {
-        const content = readSync.text(filepath)
-
-        if (!content) {
-            return options?.default || null
-        }
-
-        const [yml, error] = tryCatch.sync(() => YAML.parse(content, options?.parseOptions))
-
-        return error ? options?.default || null : yml
+    function readSync<T extends ReadSyncOptions>(filepath: string, options?: T) {
+        return readFileSync(fs, filepath, options)
     }
 
     async function readdir(filepath: string, options?: ReaddirOptions) {
