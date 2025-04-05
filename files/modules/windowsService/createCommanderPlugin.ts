@@ -13,7 +13,7 @@ export function createCommanderPlugin(service: Service, options?: Options) {
     commands.push({
         name: 'win:install',
         description: 'Install a windows service to run the script',
-        categories: ['Windows'],
+        category: 'Windows',
         execute: async () => {
             service.on('install', () => {
                 service.start()
@@ -28,7 +28,7 @@ export function createCommanderPlugin(service: Service, options?: Options) {
     commands.push({
         name: 'win:uninstall',
         description: 'Uninstall the windows service',
-        categories: ['Windows'],
+        category: 'Windows',
         execute: async () => {
             service.on('uninstall', () => {
                 console.log('service uninstalled')
@@ -40,7 +40,7 @@ export function createCommanderPlugin(service: Service, options?: Options) {
 
     commands.push({
         name: 'win:logs',
-        categories: ['Windows'],
+        category: 'Windows',
         async execute() {
             const id = (service as any).id
             const filesystem = useFilesystem()

@@ -1,13 +1,13 @@
 import type { Routine, RoutineDefinition, SchedulerConfig } from './types.js'
 import { schema as sources } from '@files/modules/sources/index.js'
 import { date } from '@files/utils/date.js'
-import { createFilesystem } from '../filesystem/createFilesystem.js'
-import { validate } from '../validator/validate.js'
+import { useFilesystem } from '@files/modules/filesystem/index.js'
+import { validate } from '@files/modules/validator/index.js'
 
 export type Scheduler = ReturnType<typeof createScheduler>
 
 export function createScheduler(payload: SchedulerConfig) {
-    const filesystem = createFilesystem()
+    const filesystem = useFilesystem()
     const resolve = filesystem.path.resolve
     const dirname = filesystem.path.dirname
     const routines: Routine[] = []
@@ -86,13 +86,11 @@ export function createScheduler(payload: SchedulerConfig) {
             throw new Error(`Routine not found: ${name}`)
         }
 
-        const result = routine.execute()
+        routine.execute().finally(() => {
+            routine.next_run = date.future(routine.interval)
 
-        routine.next_run = date.future(routine.interval)
-
-        save()
-
-        return result
+            save()
+        })
     }
 
     async function runAll() {

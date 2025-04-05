@@ -11,7 +11,6 @@ export function createCommanderPlugin(scheduler: Scheduler, options?: Options) {
     commands.push({
         name: 'scheduler:run',
         description: 'Run the a scheduler by name',
-        categories: ['Scheduler'],
         execute: async () => {
             const args = useArgs({
                 name: {
@@ -26,7 +25,6 @@ export function createCommanderPlugin(scheduler: Scheduler, options?: Options) {
     commands.push({
         name: 'scheduler:start',
         description: 'Start the scheduler and keep it running',
-        categories: ['Scheduler'],
         execute: async () => {
             await scheduler.start()
         },
@@ -35,7 +33,6 @@ export function createCommanderPlugin(scheduler: Scheduler, options?: Options) {
     commands.push({
         name: 'routines:list',
         description: 'List all routines',
-        categories: ['Scheduler'],
         execute: async () => {
             const data = scheduler.routines.map((routine) => ({
                 name: routine.name,

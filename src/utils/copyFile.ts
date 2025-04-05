@@ -7,8 +7,19 @@ export function copyFile(source: string, target: string) {
     const filesystem = createFilesystem()
     let text = filesystem.readSync.text(source)
 
-    text = text.replace(/@files\/utils/g, config.utils?.path || '@/utils')
-    text = text.replace(/@files\/modules/g, config.modules?.path || '@/modules')
+    let modulesAlias = '@/modules'
+    let utilsAlias = '@/utils'
+
+    if (config.modules?.alias) {
+        modulesAlias = config.modules.alias
+    }
+
+    if (config.utils?.alias) {
+        utilsAlias = config.utils.alias
+    }
+
+    text = text.replace(/@files\/utils/g, utilsAlias)
+    text = text.replace(/@files\/modules/g, modulesAlias)
 
     filesystem.writeSync.text(target, text, {
         recursive: true,

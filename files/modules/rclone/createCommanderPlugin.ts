@@ -11,7 +11,7 @@ export function createCommanderPlugin(instance: RCloneInstance, options?: Option
     commands.push({
         name: 'rclone:sync',
         description: 'Run rclone sync with the given configuration',
-        categories: ['RClone'],
+        category: 'Rclone',
         execute: async () => {
             const flags = useFlags({
                 options: {
@@ -26,7 +26,7 @@ export function createCommanderPlugin(instance: RCloneInstance, options?: Option
     commands.push({
         name: 'rclone:bisync',
         description: 'Run rclone sync with the given configuration',
-        categories: ['RClone'],
+        category: 'Rclone',
         execute: async () => {
             const flags = useFlags({
                 options: {
@@ -41,7 +41,7 @@ export function createCommanderPlugin(instance: RCloneInstance, options?: Option
     commands.push({
         name: 'rclone:check',
         description: 'Run rclone sync with the given configuration',
-        categories: ['RClone'],
+        category: 'Rclone',
         execute: async () => {
             const flags = useFlags({
                 options: {

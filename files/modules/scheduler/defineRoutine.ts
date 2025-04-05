@@ -1,4 +1,4 @@
-import type { RoutineDefinition } from './types'
+import type { RoutineDefinition } from './types.js'
 
 export function defineRoutine(payload: RoutineDefinition) {
     return payload

@@ -1,9 +1,9 @@
 export interface ConfigUtils {
-    path?: string
+    alias?: string
 }
 
 export interface ConfigModules {
-    path?: string
+    alias?: string
 }
 
 export interface Config {
