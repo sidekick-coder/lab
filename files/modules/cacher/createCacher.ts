@@ -1,12 +1,9 @@
-import type { FetchCacher } from '../fetch/fetch.ts'
-import { createCachePlugin } from './createCachePlugin.ts'
-import { getCache } from './getCache.ts'
-import { setCache } from './setCache.ts'
-import type { CacheConfig } from './types'
+import type { FetchCacher } from '@files/modules/fetcher/fetch.js'
+import { getCache } from './getCache.js'
+import { setCache } from './setCache.js'
+import type { CacheConfig } from './types.js'
 
 export function createCacher(config: CacheConfig) {
-    const plugin = createCachePlugin(config)
-
     const fetcher: FetchCacher = {
         async get(key) {
             const item = await getCache(config, key)
@@ -20,7 +17,6 @@ export function createCacher(config: CacheConfig) {
 
     return {
         config,
-        plugin,
         fetcher,
     }
 }

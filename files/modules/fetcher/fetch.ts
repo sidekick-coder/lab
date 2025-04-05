@@ -2,7 +2,7 @@ import qs from 'qs'
 import type { RequestInit } from 'undici'
 import { fetch, ProxyAgent } from 'undici'
 import { merge } from 'lodash-es'
-import { filesystem } from '../utils/index.ts'
+import { useFilesystem } from '@files/modules/filesystem/injections.js'
 
 export interface FetcherConfigProxy {
     name: string
@@ -51,6 +51,8 @@ export async function $fetch<T extends FetchOptions>(
     path: string,
     options?: FetchOptions
 ): Promise<FetchResponse<T>> {
+    const filesystem = useFilesystem()
+
     const fetchOptions = {
         baseURL: '',
         ...options,

@@ -1,7 +1,7 @@
-import { date } from '../utils/date.ts'
-import { filesystem } from '../utils/filesystem.ts'
-import { createCachePath } from './createCachePath.ts'
-import type { CacheConfig, CacheDefinition, CacheItem } from './types.ts'
+import { date } from '@files/utils/date.js'
+import { createCachePath } from './createCachePath.js'
+import type { CacheConfig, CacheDefinition, CacheItem } from './types.js'
+import { useFilesystem } from '@files/modules/filesystem/injections.js'
 
 function encode(data: any) {
     if (data instanceof Uint8Array) {
@@ -16,6 +16,8 @@ function encode(data: any) {
 }
 
 export async function setCache(config: CacheConfig, options: CacheDefinition, payload: any) {
+    const filesystem = useFilesystem()
+
     const path = createCachePath(config, options.key)
 
     const uint8 = encode(payload)
@@ -23,10 +25,7 @@ export async function setCache(config: CacheConfig, options: CacheDefinition, pa
     const optionsFilename = filesystem.path.join(path, 'options.json')
     const contentFilename = filesystem.path.join(path, 'content')
 
-    const item: CacheItem = await filesystem.read.json(optionsFilename, {
-        ...options,
-        expire_at: date.future(options.expires),
-    })
+    const item = await filesystem.read.json(optionsFilename)
 
     item.expire_at = date.future(options.expires)
 

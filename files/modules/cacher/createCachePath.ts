@@ -1,6 +1,6 @@
 import { resolve } from 'path'
-import { createCacheHash } from './createCacheHash.ts'
-import type { CacheConfig, CacheDefinition } from './types'
+import { createCacheHash } from './createCacheHash.js'
+import type { CacheConfig } from './types.js'
 
 export function createCachePath(config: CacheConfig, key: string) {
     const hash = createCacheHash(key)

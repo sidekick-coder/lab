@@ -1,19 +1,21 @@
-import { date } from '../utils/date.ts'
-import { filesystem } from '../utils/filesystem.ts'
-import { createCachePath } from './createCachePath.ts'
-import type { CacheConfig, CacheItem } from './types.ts'
+import { date } from '@files/utils/date.js'
+import { createCachePath } from './createCachePath.js'
+import type { CacheConfig } from './types.js'
+import { useFilesystem } from '@files/modules/filesystem/injections.js'
 
 function decode(data: any) {
     return new TextDecoder().decode(data)
 }
 
 export async function getCache(config: CacheConfig, key: string, format?: 'json' | 'text') {
+    const filesystem = useFilesystem()
+
     const path = createCachePath(config, key)
 
     const optionsFilename = filesystem.path.join(path, 'options.json')
     const contentFilename = filesystem.path.join(path, 'content')
 
-    const item: CacheItem | null = await filesystem.read.json(optionsFilename)
+    const item = await filesystem.read.json(optionsFilename)
 
     if (!item) {
         return null
