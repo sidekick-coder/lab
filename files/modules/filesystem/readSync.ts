@@ -5,7 +5,7 @@ export interface ReadSyncOptions {
 }
 
 /* eslint-disable prettier/prettier */
-export type ReadResult<T extends ReadSyncOptions > = 
+export type ReadSyncResult<T extends ReadSyncOptions > = 
     T extends { transform: (content: Uint8Array) => infer R } ? R
     : Uint8Array
 /* eslint-enable prettier/prettier */
@@ -21,5 +21,5 @@ export function readSync<T extends ReadSyncOptions>(
         content = options.transform(content)
     }
 
-    return content as ReadResult<T>
+    return content as ReadSyncResult<T>
 }
