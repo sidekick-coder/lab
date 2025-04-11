@@ -8,6 +8,7 @@ import minimist from 'minimist'
 import type { Config } from './schemas.js'
 import { config } from './schemas.js'
 import { createEmitter } from '@files/modules/emitter/index.js'
+import { parse } from './options.js'
 
 const require = createRequire(import.meta.url)
 
@@ -41,7 +42,11 @@ export function createCommander(payload: Partial<Config> = {}) {
         const fileModule = require(file)
         const command = fileModule.default
 
-        add(command)
+        if (command.module) {
+            return addToSubCommander(command.module, command)
+        }
+
+        return add(command)
     }
 
     function getSubcommaners() {
@@ -62,7 +67,7 @@ export function createCommander(payload: Partial<Config> = {}) {
         subCommander.add(command)
     }
 
-    async function run(name: string) {
+    async function run(name: string, args = '') {
         const command = commands.find((command) => command.name === name)
 
         if (!command) {
@@ -71,7 +76,11 @@ export function createCommander(payload: Partial<Config> = {}) {
 
         emitter.emit('command:before', { command, plugins, options })
 
-        const result = await command.execute()
+        const commandCtx = {
+            options: parse(command.options, args),
+        }
+
+        const result = await command.execute(commandCtx)
 
         emitter.emit('command:after', { command, plugins, options })
 
@@ -138,12 +147,14 @@ export function createCommander(payload: Partial<Config> = {}) {
 
         ctx.open()
 
+        const commandArgs = newArgs.slice(1)
+
         ctx.provide('commander:commands', commands)
         ctx.provide('commander:plugins', plugins)
-        ctx.provide('commander:args', newArgs.slice(1))
+        ctx.provide('commander:args', commandArgs)
         ctx.provide('commander:options', options)
 
-        const [response, error] = await tryCatch(() => run(name))
+        const [response, error] = await tryCatch(() => run(name, commandArgs.join(' ')))
 
         ctx.close()
 

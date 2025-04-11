@@ -1,21 +1,16 @@
-import type { SourceOptions } from '@files/modules/sources/types.js'
-import type { ArgDefinitionRecord } from './args.js'
-import type { FlagDefinitionRecord } from './flags.js'
+import type { OptionRecord, OptionRecordOutput } from './options.js'
 
-export interface Command {
+export interface CommandContext<T extends OptionRecord = OptionRecord> {
+    options: OptionRecordOutput<T>
+}
+
+export interface Command<T extends OptionRecord = OptionRecord> {
     name: string
     description?: string
     category?: string
-    args?: ArgDefinitionRecord
-    flags?: FlagDefinitionRecord
-    execute(): Promise<any> | void
-}
-
-export interface CommanderConfig {
-    binName: string
-    sources: SourceOptions
-    manifest: string
-    defaultCommand?: string
+    module?: string
+    options?: T
+    execute(ctx: CommandContext<T>): Promise<any> | void
 }
 
 export interface PluginExecute {
@@ -30,16 +25,6 @@ export interface PluginCommandList {
     prefix?: string
     type: 'command-list'
     commands: Command[]
-}
-
-export interface ManifestPlugin extends PluginExecute {
-    manifest: Manifest
-}
-
-export interface Manifest {
-    name: string
-    commands: Omit<Command, 'execute'>[]
-    plugins: ManifestPlugin[]
 }
 
 export type Plugin = PluginExecute | PluginCommandList

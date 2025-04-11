@@ -16,7 +16,23 @@ export type Option = OptionArg | OptionFlag
 
 export type OptionRecord = Record<string, Option>
 
-export function parse(options: OptionRecord, payload: string) {
+/* eslint-disable prettier/prettier */
+export type OptionOutput<T extends Option> =
+    T extends { transform: (value: string) => infer R } ? R
+    : string
+
+export type OptionRecordOutput<T extends OptionRecord> = 
+    { [K in keyof T]: OptionOutput<T[K]> }
+/* eslint-enable prettier/prettier */
+
+export function defineOptions<T extends OptionRecord>(options: T): T {
+    return options
+}
+
+export function parse<T extends OptionRecord>(
+    options: T,
+    payload: string
+): OptionRecordOutput<T> & { _unknown: string[] } {
     const result: Record<string, any> = {}
 
     const all: (Option & { key: string; name: string })[] = []
@@ -104,5 +120,5 @@ export function parse(options: OptionRecord, payload: string) {
 
     result['_unknown'] = unknown
 
-    return result
+    return result as any
 }
