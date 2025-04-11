@@ -1,5 +1,5 @@
 import { v } from './valibot.js'
-import { InferOutput, ObjectSchema, ObjectEntries } from 'valibot'
+import type { InferOutput, ObjectSchema, ObjectEntries } from 'valibot'
 import type { ValibotSchema, ValibotSchemaAsync } from './types.js'
 
 export interface ValidatorCallback<T extends ValibotSchema> {
