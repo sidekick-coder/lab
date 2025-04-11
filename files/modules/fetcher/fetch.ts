@@ -2,7 +2,6 @@ import qs from 'qs'
 import type { RequestInit } from 'undici'
 import { fetch, ProxyAgent } from 'undici'
 import { merge } from 'lodash-es'
-import { useFilesystem } from '@files/modules/filesystem/injections.js'
 
 export interface FetcherConfigProxy {
     name: string
