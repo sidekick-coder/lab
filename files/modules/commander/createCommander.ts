@@ -27,6 +27,18 @@ export function createCommander(payload: Partial<Config> = {}) {
 
             const exists = commands.some((command) => command.name === name)
 
+            if (command.commander) {
+                const subCommander = subCommanders.get(command.commander)
+
+                if (!subCommander) {
+                    throw new Error(`Sub commander not found: ${command.commander}`)
+                }
+
+                subCommander.add(command)
+
+                continue
+            }
+
             if (exists) {
                 return
             }
@@ -41,10 +53,6 @@ export function createCommander(payload: Partial<Config> = {}) {
     function addFile(file: string) {
         const fileModule = require(file)
         const command = fileModule.default
-
-        if (command.module) {
-            return addToSubCommander(command.module, command)
-        }
 
         return add(command)
     }

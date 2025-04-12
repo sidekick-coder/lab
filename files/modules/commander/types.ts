@@ -8,7 +8,7 @@ export interface Command<T extends OptionRecord = OptionRecord> {
     name: string
     description?: string
     category?: string
-    module?: string
+    commander?: string
     options?: T
     execute(ctx: CommandContext<T>): Promise<any> | void
 }
