@@ -7,11 +7,16 @@ export interface RoutineDefinition {
     execute(): Promise<any>
 }
 
-export interface Routine extends RoutineDefinition {
+export interface RoutineState {
     name: string
     next_run: string
+    last_run: string
+    count: number
 }
 
+export type Routine = RoutineDefinition & RoutineState
+
 export interface SchedulerConfig {
-    sources?: SourceOptions
+    state?: RoutineState[]
+    save?: (state: RoutineState[]) => void
 }
