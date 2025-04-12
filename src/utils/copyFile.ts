@@ -1,5 +1,5 @@
 import type { Config } from '@/types.js'
-import { inject } from '@files/modules/context/index.js'
+import { inject } from '@files/modules/di/index.js'
 import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
 
 export function copyFile(source: string, target: string) {

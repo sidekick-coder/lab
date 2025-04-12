@@ -1,7 +1,7 @@
 import type { Config } from '@/types.js'
 import { copyFile } from '@/utils/copyFile.js'
 import { defineCommand } from '@files/modules/commander/defineCommand.js'
-import { inject } from '@files/modules/context/index.js'
+import { inject } from '@files/modules/di/index.js'
 import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
 import { camelCase } from 'lodash-es'
 

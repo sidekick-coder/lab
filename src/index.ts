@@ -1,6 +1,6 @@
 import { createCommanderHelp } from '@files/modules/commander/createCommanderHelp.js'
 import { createCommander } from '@files/modules/commander/index.js'
-import { provide } from '@files/modules/context/index.js'
+import { provide } from '@files/modules/di/index.js'
 import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
 import { merge } from 'lodash-es'
 import { createRequire } from 'module'

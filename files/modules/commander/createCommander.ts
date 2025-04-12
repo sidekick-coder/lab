@@ -3,7 +3,7 @@ import { createRequire } from 'module'
 import type { Command, Plugin } from './types.js'
 import { validate } from '@files/modules/validator/index.js'
 import { tryCatch } from '@files/utils/tryCatch.js'
-import * as ctx from '@files/modules/context/index.js'
+import * as ctx from '@files/modules/di/index.js'
 import minimist from 'minimist'
 import type { Config } from './schemas.js'
 import { config } from './schemas.js'
@@ -77,7 +77,7 @@ export function createCommander(payload: Partial<Config> = {}) {
         emitter.emit('command:before', { command, plugins, options })
 
         const commandCtx = {
-            options: parse(command.options, args),
+            options: parse(command.options || {}, args),
         }
 
         const result = await command.execute(commandCtx)
