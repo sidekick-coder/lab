@@ -4,6 +4,7 @@ export interface ConfigUtils {
 
 export interface ConfigModules {
     alias?: string
+    dir?: string
 }
 
 export interface Config {

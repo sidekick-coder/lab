@@ -35,7 +35,7 @@ export default defineCommand({
         const moduleName = camelCase(name)
 
         const source = resolve(modulesDir, moduleName)
-        const target = resolve(config.baseDir, 'modules', moduleName)
+        const target = resolve(config.baseDir, config.modules.dir || 'modules', moduleName)
 
         if (fs.existsSync(target) && !force) {
             console.log(`Module ${name} already exists, use --force to overwrite`)
