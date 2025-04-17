@@ -1,6 +1,7 @@
 import type { OptionRecord, OptionRecordOutput } from './options.js'
 
 export interface CommandContext<T extends OptionRecord = OptionRecord> {
+    args: string[]
     options: OptionRecordOutput<T>
 }
 
@@ -13,18 +14,15 @@ export interface Command<T extends OptionRecord = OptionRecord> {
     execute(ctx: CommandContext<T>): Promise<any> | void
 }
 
-export interface PluginExecute {
-    name: string
-    type: 'execute'
-    manifest?: any
-    execute(options: string[]): Promise<any>
+export interface ConfigHookOptions {
+    command: Command
+    ctx: CommandContext
 }
 
-export interface PluginCommandList {
-    name: string
-    prefix?: string
-    type: 'command-list'
-    commands: Command[]
+export interface Config {
+    name?: string
+    bin?: string
+    defaultCommand?: string
+    before?: (options: ConfigHookOptions) => void
+    after?: (options: ConfigHookOptions) => void
 }
-
-export type Plugin = PluginExecute | PluginCommandList

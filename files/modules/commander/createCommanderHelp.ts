@@ -1,6 +1,5 @@
 import type { Commander } from './createCommander.js'
 import { createHelpText, type Section } from './createHelpText.js'
-import { createHelpTextFromCommander } from './createHelpTextFromCommander.js'
 import { defineCommand } from './defineCommand.js'
 
 interface Options {
@@ -15,7 +14,7 @@ export function createCommanderHelp(commander: Commander, options: Options = {})
         description: 'Display help information for commands',
         execute: async () => {
             const sections = [] as Section[]
-            const bin = commander.options.bin
+            const bin = commander.config.bin
 
             const uncategorized = commander.commands
                 .filter((c) => !c.category)
@@ -58,7 +57,7 @@ export function createCommanderHelp(commander: Commander, options: Options = {})
 
                 let description = ''
 
-                if (commander.options.bin) {
+                if (commander.config.bin) {
                     description += `Usage: ${bin} ${title} [COMMAND] [OPTIONS]`
                 }
 
