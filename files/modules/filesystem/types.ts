@@ -27,7 +27,6 @@ export interface FilesystemOptionsFs {
 
     remove: (path: string) => Promise<void>
     removeSync: (path: string) => void
-    removeAt: (path: string, miliseconds: number) => Promise<boolean>
 
     [key: string]: any
 }

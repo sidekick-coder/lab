@@ -1,26 +1,10 @@
-import { tryCatch } from '@files/utils/tryCatch.js'
-import { YAML } from '@files/utils/yaml.js'
-import type { FilesystemOptions, ReaddirOptions } from './types.js'
+import type { FilesystemOptions } from './types.js'
 import { createFsNode } from './createFsNode.js'
 import { createPathNode } from './createPathNode.js'
-import type { ValidatePayload, ValidateResult } from '../validator/validate.js'
-import { validate } from '../validator/validate.js'
 import { read as readFile, type ReadOptions } from './read.js'
 import { readSync as readFileSync, type ReadSyncOptions } from './readSync.js'
 
 export type Filesystem = ReturnType<typeof createFilesystem>
-
-export interface ReadRecordOptions extends ReadOptions {
-    reviver?: (key: any, value: any) => any
-    default?: Record<string, any>
-    schema?: ValidatePayload
-}
-
-/*  eslint-disable prettier/prettier */
-export type ReadOutput<T extends ReadRecordOptions> =
-    T extends { schema: ValidatePayload } ? ValidateResult<T['schema']> | null :
-    Record<string, any> | null
-/*  eslint-enable prettier/prettier */
 
 export function createFilesystem(options: FilesystemOptions = {}) {
     const fs = options.fs || createFsNode()
@@ -52,22 +36,6 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         return readFileSync(fs, filepath, options)
     }
 
-    async function readdir(filepath: string, options?: ReaddirOptions) {
-        return fs.readdir(filepath, options)
-    }
-
-    function readdirSync(filepath: string, options?: ReaddirOptions) {
-        return fs.readdirSync(filepath, options)
-    }
-
-    function glob(pattern: string) {
-        return fs.glob(pattern)
-    }
-
-    function globSync(pattern: string) {
-        return fs.globSync(pattern)
-    }
-
     async function write(filename: string, content: Uint8Array, options?: any) {
         if (locks.has(filename)) {
             await awaitLock(filename)
@@ -81,27 +49,11 @@ export function createFilesystem(options: FilesystemOptions = {}) {
             await mkdir(parent, { recursive: true })
         }
 
-        const [, error] = await tryCatch(() => fs.write(filename, content))
+        await fs.write(filename, content).catch((error) => {
+            console.error(`Error writing file ${filename}:`, error)
+        })
 
         locks.delete(filename)
-
-        if (error) {
-            throw error
-        }
-    }
-
-    write.text = async function (filename: string, content: string, options?: any) {
-        await write(filename, new TextEncoder().encode(content), options)
-    }
-
-    write.json = async function (filename: string, content: any, options?: any) {
-        await write.text(filename, JSON.stringify(content, null, 2), options)
-    }
-
-    write.yaml = async function (filename: string, content: any, options?: any) {
-        const yamlContent = YAML.stringify(content)
-
-        await write.text(filename, yamlContent, options)
     }
 
     function writeSync(filename: string, content: Uint8Array, options?: any) {
@@ -112,20 +64,6 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         }
 
         fs.writeSync(filename, content)
-    }
-
-    writeSync.text = function (filename: string, content: string, options?: any) {
-        writeSync(filename, new TextEncoder().encode(content), options)
-    }
-
-    writeSync.json = function (filename: string, content: any, options?: any) {
-        writeSync.text(filename, JSON.stringify(content, null, 2), options)
-    }
-
-    writeSync.yaml = function (filename: string, content: any, options?: any) {
-        const yamlContent = YAML.stringify(content)
-
-        writeSync.text(filename, yamlContent, options)
     }
 
     async function mkdir(filepath: string, options?: any) {
@@ -152,25 +90,6 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         fs.mkdirSync(filepath)
     }
 
-    async function copy(source: string, target: string) {
-        return fs.copy(source, target)
-    }
-
-    function copySync(source: string, target: string) {
-        return fs.copySync(source, target)
-    }
-
-    function remove(filepath: string) {
-        return fs.remove(filepath)
-    }
-
-    function removeSync(filepath: string) {
-        return fs.removeSync(filepath)
-    }
-    function removeAt(filepath: string, miliseconds: number) {
-        return fs.removeAt(filepath, miliseconds)
-    }
-
     return {
         path,
         fs,
@@ -181,11 +100,11 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         read,
         readSync,
 
-        readdir,
-        readdirSync,
+        readdir: fs.readdir,
+        readdirSync: fs.readdirSync,
 
-        glob,
-        globSync,
+        glob: fs.glob,
+        globSync: fs.globSync,
 
         write,
         writeSync,
@@ -193,11 +112,10 @@ export function createFilesystem(options: FilesystemOptions = {}) {
         mkdir,
         mkdirSync,
 
-        copy,
-        copySync,
+        copy: fs.copy,
+        copySync: fs.copySync,
 
-        remove,
-        removeSync,
-        removeAt,
+        remove: fs.remove,
+        removeSync: fs.removeSync,
     }
 }
