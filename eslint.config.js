@@ -10,7 +10,10 @@ export default [
         rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
             'import/no-unresolved': 'off',
-            '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                { argsIgnorePattern: '^_', caughtErrors: 'none'},
+            ], // Ignore unused variables that start with an underscore
         },
     },
 ]

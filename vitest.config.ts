@@ -5,6 +5,7 @@ export default defineConfig({
     test: {
         watch: false,
         reporters: ['verbose'],
+        exclude: ['**/node_modules/**', '**/dist/**', '**/playground/**'],
     },
     plugins: [tsconfigPaths()],
 })
