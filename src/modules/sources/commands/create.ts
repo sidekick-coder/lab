@@ -13,7 +13,7 @@ export default defineCommand({
         const payload = {
             name: '',
             type: '',
-            confg: {} as any,
+            config: {} as any,
         }
 
         const name = await input({ message: 'Enter the source name' })
@@ -33,7 +33,7 @@ export default defineCommand({
             const username = await input({ message: 'Enter the username' })
             const repository = await input({ message: 'Enter the repository name' })
 
-            payload.confg = {
+            payload.config = {
                 username,
                 repository,
             }
@@ -42,7 +42,7 @@ export default defineCommand({
         if (payload.type === 'local') {
             const path = await input({ message: 'Enter the path' })
 
-            payload.confg = {
+            payload.config = {
                 path,
             }
         }

@@ -1,13 +1,16 @@
 import type { Commander } from './createCommander.js'
 import { createHelpText, type Section } from './createHelpText.js'
 
-export interface Options {
+export interface CreateHelpTextFromCommanderOptions {
     title?: string
     description?: string
     extraSections?: Section[]
 }
 
-export function createHelpTextFromCommander(commander: Commander, options: Options = {}) {
+export function createHelpTextFromCommander(
+    commander: Commander,
+    options: CreateHelpTextFromCommanderOptions = {}
+) {
     const sections = [] as Section[]
 
     const uncategorized = commander.commands
