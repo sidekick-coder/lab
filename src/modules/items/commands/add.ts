@@ -1,7 +1,8 @@
-import os from 'os'
 import { defineCommand } from '@/core/commander/defineCommand.js'
 import { filesystem, parsers, transforms } from '@/filesystem.js'
 import { checkbox } from '@inquirer/prompts'
+import { findManifest } from '@/utils/findManifest.js'
+import { readLabFile } from '@/utils/readItemFile.js'
 
 export default defineCommand({
     name: 'add',
@@ -9,13 +10,25 @@ export default defineCommand({
     options: {
         'source': {
             type: 'flag',
+            alias: ['s'],
+        },
+        'path': {
+            type: 'flag',
+            alias: ['p'],
+        },
+        'url': {
+            type: 'flag',
+            alias: ['u'],
+            description: 'URI to fetch the manifest',
         },
         'output': {
             type: 'flag',
+            alias: ['o'],
             description: 'Folder to output the files',
         },
-        'item': {
+        'name': {
             type: 'flag',
+            alias: ['n'],
             description: 'Item name to add the files from the source',
         },
         'generate-index': {
@@ -25,42 +38,23 @@ export default defineCommand({
         },
     },
     execute: async ({ options }) => {
-        const resolve = filesystem.path.resolve
-        const filename = resolve(os.homedir(), '.sidekick-coder-lab', 'config.json')
-        const output = resolve(process.cwd(), options.output || '')
-        const itemName = options.item || ''
-
-        if (!options.output || !options.item) {
-            console.log('Output folder is required.')
-            return
-        }
-
-        if (!filesystem.existsSync(filename)) {
-            console.log('No sources found.')
-            return
-        }
-
-        const config = filesystem.readSync(filename, {
-            transform: transforms.json,
+        const manifest = await findManifest({
+            path: options.path,
+            source: options.source,
+            url: options.url,
         })
 
-        const sources = config.sources || []
-
-        const source = sources.find((source: any) => source.name === options.source)
-
-        if (!source) {
-            console.log(`Source ${options.source} not found.`)
+        if (!options.name || !options.output) {
+            console.log('Please provide the item name and output folder.')
             return
         }
 
-        const manifestFilename = source.config.path
-        const manifestFolder = filesystem.path.dirname(manifestFilename)
+        const item = manifest.items.find((item: any) => item.name === options.name)
 
-        const manifest = filesystem.readSync(source.config.path, {
-            transform: transforms.json,
-        })
-
-        const item = manifest.items.find((item: any) => item.name === itemName)
+        if (!item) {
+            console.log(`Item ${options.name} not found.`)
+            return
+        }
 
         let files = []
 
@@ -79,12 +73,23 @@ export default defineCommand({
             })
         }
 
+        if (!filesystem.existsSync(options.output)) {
+            filesystem.mkdirSync(options.output, {
+                recursive: true,
+            })
+        }
+
         for (const file of files) {
             const basename = filesystem.path.basename(file.path)
-            const target = filesystem.path.join(output, basename)
-            const sourceFile = filesystem.path.join(manifestFolder, file.path)
+            const target = filesystem.path.join(options.output, basename)
+            const contents = await readLabFile({
+                path: options.path,
+                source: options.source,
+                url: options.url,
+                filename: file.path,
+            })
 
-            filesystem.copySync(sourceFile, target)
+            filesystem.writeSync(target, parsers.text(contents))
         }
 
         if (options['generate-index']) {
@@ -99,10 +104,10 @@ export default defineCommand({
                 '.test.js',
             ]
 
-            const indexFilePath = filesystem.path.join(output, 'index.ts')
+            const indexFilePath = filesystem.path.join(options.output, 'index.ts')
 
             let content = filesystem
-                .readdirSync(output)
+                .readdirSync(options.output)
                 .filter((file) => file.endsWith('.ts'))
                 .filter((file) => !exclude.some((ex) => file.includes(ex)))
                 .map((file) => file.replace('.ts', '.js'))

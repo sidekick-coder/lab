@@ -1,9 +1,9 @@
 import { defineCommand } from '@/core/commander/defineCommand.js'
-import { findManifest } from '@/utils/findManifest.js'
+import { readLabFile } from '@/utils/readItemFile.js'
 
 export default defineCommand({
-    name: 'list',
-    description: 'List all available items',
+    name: 'read',
+    description: 'Read file contents inside a lab source',
     options: {
         source: {
             type: 'flag',
@@ -18,21 +18,22 @@ export default defineCommand({
             alias: ['u'],
             description: 'URI to fetch the manifest',
         },
+        filename: {
+            type: 'flag',
+            alias: ['f'],
+            description: 'Item name to add the files from the source',
+        },
     },
     execute: async ({ options }) => {
-        const manifest = await findManifest(options)
-
-        if (!manifest) {
-            console.log('Could not retrieve the manifest.')
+        if (!options.filename) {
+            console.log('Filename is required.')
             return
         }
 
-        console.log(`Name: ${manifest.name}`)
+        const contents = await readLabFile(options)
 
-        for (const item of manifest.items) {
-            const { name } = item
+        console.log('Contents:')
 
-            console.log(`- ${name}`)
-        }
+        console.log(contents)
     },
 })
