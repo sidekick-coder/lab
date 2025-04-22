@@ -1,0 +1,11 @@
+# exclude
+tsup.config.ts
+vitest.config.ts
+tsconfig.json
+composables
+types
+playground
+src
+docs
+# include
+!dist
