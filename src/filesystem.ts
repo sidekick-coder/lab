@@ -1,4 +1,4 @@
-import { createFilesystem } from './core/filesystem/createFilesystem.js'
+import { createFilesystem } from './core/filesystem/index.js'
 
 export const filesystem = createFilesystem()
 

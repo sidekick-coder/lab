@@ -1,4 +1,4 @@
-import { createFilesystem } from '@files/modules/filesystem/createFilesystem.js'
+import { createFilesystem } from '@/core/filesystem/createFilesystem.js'
 import { createRequire } from 'module'
 import { pathToFileURL } from 'url'
 

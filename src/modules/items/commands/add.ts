@@ -8,31 +8,32 @@ export default defineCommand({
     name: 'add',
     description: 'Add item files',
     options: {
-        'source': {
+        source: {
             type: 'flag',
             alias: ['s'],
         },
-        'path': {
+        path: {
             type: 'flag',
             alias: ['p'],
         },
-        'url': {
+        url: {
             type: 'flag',
             alias: ['u'],
             description: 'URI to fetch the manifest',
         },
-        'output': {
+        output: {
             type: 'flag',
             alias: ['o'],
             description: 'Folder to output the files',
         },
-        'name': {
+        name: {
             type: 'flag',
             alias: ['n'],
             description: 'Item name to add the files from the source',
         },
-        'generate-index': {
+        index: {
             type: 'flag',
+            alias: ['i'],
             description: 'Generate index file',
             transform: (value: any) => value === 'true' || value === true,
         },
@@ -92,7 +93,7 @@ export default defineCommand({
             filesystem.writeSync(target, parsers.text(contents))
         }
 
-        if (options['generate-index']) {
+        if (options['index']) {
             const exclude = [
                 'index.ts',
                 'index.js',

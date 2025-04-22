@@ -25,8 +25,6 @@ export interface Item {
 
 export interface Manifest {
     name: string
-    filename?: string
-    url?: string
     items: Item[]
 }
 
