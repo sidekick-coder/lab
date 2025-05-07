@@ -39,8 +39,10 @@ export async function findManifest(options: Options) {
             return
         }
 
-        if (source.filename) {
-            const json = filesystem.readSync(source.filename, {
+        if (source.type == 'local') {
+            const filename = resolve(source.config.path || '', 'manifest.json')
+
+            const json = filesystem.readSync(filename, {
                 transform: transforms.json,
             })
 

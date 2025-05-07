@@ -1,10 +1,7 @@
 import config from '@/config.js'
 import { filesystem, transforms } from '@/filesystem.js'
-import { findManifestByUrl } from '@/utils/findManifestByUrl.js'
-import type { Manifest } from './findManifest.js'
 
 const resolve = filesystem.path.resolve
-const dirname = filesystem.path.dirname
 
 export interface ReadLabFileOptions {
     source?: string
@@ -14,6 +11,23 @@ export interface ReadLabFileOptions {
 }
 
 export async function readLabFile(options: ReadLabFileOptions) {
+    if (options.source) {
+        const source = config.sources.find((source: any) => source.name === options.source)
+
+        if (!source) {
+            console.log(`Source ${options.source} not found.`)
+            return
+        }
+
+        if (source.type == 'local') {
+            const filename = resolve(source.config.path || '', options.filename)
+
+            return filesystem.readSync(filename, {
+                transform: transforms.text,
+            })
+        }
+    }
+
     if (options.path) {
         const filename = resolve(options.path, options.filename)
 

@@ -1,3 +1,4 @@
+import { ui } from '@/core/cli-ui/ui.js'
 import { defineCommand } from '@/core/commander/defineCommand.js'
 import { findManifest } from '@/utils/findManifest.js'
 
@@ -27,12 +28,22 @@ export default defineCommand({
             return
         }
 
-        console.log(`Name: ${manifest.name}`)
-
-        for (const item of manifest.items) {
-            const { name } = item
-
-            console.log(`- ${name}`)
-        }
+        ui.array(manifest.items, [
+            {
+                label: 'Name',
+                value: 'name',
+            },
+            {
+                label: 'Description',
+                value: 'description',
+            },
+            {
+                label: 'Files',
+                value: (item) => {
+                    console.log('item', item)
+                    return item.files.length
+                },
+            },
+        ])
     },
 })

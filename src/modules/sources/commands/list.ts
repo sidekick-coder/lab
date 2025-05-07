@@ -1,6 +1,7 @@
 import os from 'os'
 import { defineCommand } from '@/core/commander/defineCommand.js'
 import { filesystem, transforms } from '@/filesystem.js'
+import { ui } from '@/core/cli-ui/ui.js'
 
 export default defineCommand({
     name: 'list',
@@ -27,10 +28,6 @@ export default defineCommand({
             return
         }
 
-        sources.forEach((source: any) => {
-            const { name, type } = source
-
-            console.log(`- ${name}: ${type}`)
-        })
+        ui.array(sources)
     },
 })

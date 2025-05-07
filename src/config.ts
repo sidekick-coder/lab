@@ -1,5 +1,5 @@
 import os from 'os'
-import { filesystem, transforms } from '@/filesystem.js'
+import { filesystem, parsers, transforms } from '@/filesystem.js'
 
 const config = {
     sources: [],
@@ -12,8 +12,16 @@ const json = filesystem.readSync(filename, {
     transform: transforms.json,
 })
 
-if (!json) {
+if (json) {
     Object.assign(config, json)
 }
 
-export default config
+export default new Proxy(config, {
+    set(target, prop, value) {
+        target[prop] = value
+
+        filesystem.writeSync(filename, parsers.json(config))
+
+        return true
+    },
+})

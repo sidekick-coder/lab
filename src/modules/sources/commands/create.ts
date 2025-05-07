@@ -1,15 +1,11 @@
-import os from 'os'
 import { defineCommand } from '@/core/commander/defineCommand.js'
-import { filesystem, parsers, transforms } from '@/filesystem.js'
 import { input, select } from '@inquirer/prompts'
+import config from '@/config.js'
 
 export default defineCommand({
     name: 'create',
     description: 'Create new sources',
     execute: async () => {
-        const resolve = filesystem.path.resolve
-        const filename = resolve(os.homedir(), '.sidekick-coder-lab', 'config.json')
-
         const payload = {
             name: '',
             type: '',
@@ -47,25 +43,11 @@ export default defineCommand({
             }
         }
 
-        let config = {
-            sources: [],
-        }
-
-        if (filesystem.existsSync(filename)) {
-            config = filesystem.readSync(filename, {
-                transform: transforms.json,
-            })
-        }
-
         const sources = config.sources || []
 
         sources.push(payload)
 
         config.sources = sources
-
-        filesystem.writeSync(filename, parsers.json(config), {
-            recursive: true,
-        })
 
         console.log('New source created:')
 
