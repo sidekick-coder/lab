@@ -10,6 +10,16 @@ export interface ReadLabFileOptions {
     filename: string
 }
 
+export async function readFromGithub(username: string, repository: string, filename: string) {
+    const url = `https://raw.githubusercontent.com/${username}/${repository}/HEAD/${filename}`
+
+    const response = await fetch(url)
+
+    const text = await response.text()
+
+    return text
+}
+
 export async function readLabFile(options: ReadLabFileOptions) {
     if (options.source) {
         const source = config.sources.find((source: any) => source.name === options.source)
@@ -26,6 +36,14 @@ export async function readLabFile(options: ReadLabFileOptions) {
                 transform: transforms.text,
             })
         }
+
+        if (source.type == 'github') {
+            return readFromGithub(
+                source.config.username,
+                source.config.repository,
+                options.filename
+            )
+        }
     }
 
     if (options.path) {
@@ -41,13 +59,7 @@ export async function readLabFile(options: ReadLabFileOptions) {
         const username = url.pathname.split('/')[1]
         const repository = url.pathname.split('/')[2]
 
-        const rawUrl = `https://raw.githubusercontent.com/${username}/${repository}/HEAD/${options.filename}`
-
-        const response = await fetch(rawUrl)
-
-        const text = await response.text()
-
-        return text
+        return readFromGithub(username, repository, options.filename)
     }
 
     throw new Error('Could not find the lab file.')

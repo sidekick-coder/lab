@@ -48,6 +48,14 @@ export async function findManifest(options: Options) {
 
             manifest = json
         }
+
+        if (source.type == 'github') {
+            const url = `https://github.com/${source.config.username}/${source.config.repository}`
+
+            const json = await findManifestByUrl(url)
+
+            manifest = json
+        }
     }
 
     if (options.path) {
