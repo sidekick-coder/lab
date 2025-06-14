@@ -1,12 +1,15 @@
-import { createCommander, createCommanderHelp } from '@/core/commander/index.js'
-import { commander as rootCommander } from '@/commander.js'
-import list from './commands/list.js'
-import add from './commands/add.js'
+import { createCommander } from '@/core/commander/index.js'
+import { defineModule } from '@/utils/defineModule.js'
+import { resolve } from 'path'
 
-const commander = createCommander()
+export default defineModule({
+    name: 'items',
+    description: 'Manage items',
+    setup(lab) {
+        const commander = createCommander()
 
-rootCommander.addSubCommander('items', commander)
+        commander.addFolder(resolve(import.meta.dirname, 'commands'))
 
-commander.add(createCommanderHelp(commander))
-
-commander.add(list, add)
+        lab.commander.addSubCommander('items', commander)
+    },
+})

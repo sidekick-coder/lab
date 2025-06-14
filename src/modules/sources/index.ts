@@ -1,13 +1,15 @@
-import { createCommander, createCommanderHelp } from '@/core/commander/index.js'
-import { commander as rootCommander } from '@/commander.js'
-import list from './commands/list.js'
-import create from './commands/create.js'
-import destroy from './commands/destroy.js'
+import { createCommander } from '@/core/commander/index.js'
+import { defineModule } from '@/utils/defineModule.js'
+import { resolve } from 'path'
 
-const commander = createCommander()
+export default defineModule({
+    name: 'sources',
+    description: 'Manage sources',
+    setup(lab) {
+        const commander = createCommander()
 
-rootCommander.addSubCommander('sources', commander)
+        commander.addFolder(resolve(import.meta.dirname, 'commands'))
 
-commander.add(createCommanderHelp(commander))
-
-commander.add(list, create, destroy)
+        lab.commander.addSubCommander('sources', commander)
+    },
+})
