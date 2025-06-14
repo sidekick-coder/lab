@@ -1,6 +1,6 @@
 {
     "name": "@sidekick-coder/lab",
-    "description": "Helper cli to import/download scripts from github repositories.",
+    "description": "A developer-friendly CLI for managing and running typed commands globally, eliminating the hassle of node_modules in every project",
     "version": "2.1.0",
     "type": "module",
     "keywords": [
