@@ -1,7 +1,7 @@
 {
     "name": "@sidekick-coder/lab",
     "description": "A developer-friendly CLI for managing and running typed commands globally, eliminating the hassle of node_modules in every project",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "type": "module",
     "keywords": [
         "cli",
