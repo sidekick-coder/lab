@@ -45,7 +45,18 @@ alias lab="npx @sidekick-coder/lab"
 
 ### PowerShell
 ```powershell
-Set-Alias lab "npx @sidekick-coder/lab"
+# npx
+function lab {
+    npx '@sidekick-coder/lab' @args
+}
+
+# gloabl install 
+function lab {
+    $root = npm root -g
+    $path = Join-Path -Path $root -ChildPath "@sidekick-coder/lab/index.js"
+
+    node $path @args
+}
 ```
 
 Now you can use `lab` as a shortcut for the CLI.
