@@ -2,6 +2,7 @@
 
 export * from './createCommander.js'
 export * from './createCommanderHelp.js'
+export * from './createCommandHelp.js'
 export * from './createHelpText.js'
 export * from './createHelpTextFromCommander.js'
 export * from './defineCommand.js'

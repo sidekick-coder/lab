@@ -8,7 +8,9 @@ interface Options {
     extraSections?: Section[]
 }
 
-export function createCommanderHelp(commander: Commander, options: Options = {}) {
+type CreateHelpCommandPayload = Pick<Commander, 'config' | 'commands' | 'getSubcommaners'>
+
+export function createCommanderHelp(commander: CreateHelpCommandPayload, options: Options = {}) {
     return defineCommand({
         name: 'help',
         description: 'Display help information for commands',

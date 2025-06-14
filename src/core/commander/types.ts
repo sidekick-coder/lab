@@ -1,4 +1,5 @@
 import type { OptionRecord, OptionRecordOutput } from './options.js'
+import type fs from 'fs'
 
 export interface CommandContext<T extends OptionRecord = OptionRecord> {
     args: string[]
@@ -25,4 +26,5 @@ export interface Config {
     defaultCommand?: string
     before?: (options: ConfigHookOptions) => void
     after?: (options: ConfigHookOptions) => void
+    fs?: typeof fs
 }
