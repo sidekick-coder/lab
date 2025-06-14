@@ -27,6 +27,13 @@ export default defineCommand({
         const pwd = process.cwd()
         const tsconfigLabPath = resolve(root, 'tsconfig.lab.json')
 
+        // Check if the current directory is empty before proceeding
+        const dirContents = fs.readdirSync(pwd).filter((f) => f !== '.' && f !== '..')
+        if (dirContents.length > 0) {
+            console.error('The current directory is not empty. Initialization aborted.')
+            return
+        }
+
         let name = options.name
 
         if (!name) {
