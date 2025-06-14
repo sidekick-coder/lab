@@ -5,4 +5,3 @@ export const ui = {
     object,
     array,
 }
-

@@ -61,7 +61,7 @@ export function array<T = any>(data: T[], columns?: TableHead<T>[]) {
         }
 
         if (!h.label) {
-            h.label = h.value
+            h.label = String(h.value)
         }
     })
 

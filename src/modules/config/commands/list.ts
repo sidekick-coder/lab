@@ -10,6 +10,6 @@ export default defineCommand({
 
         const configs = await repository.list()
 
-        configs.forEach(object)
+        configs.forEach((c) => object(c))
     },
 })

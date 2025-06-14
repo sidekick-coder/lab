@@ -131,11 +131,11 @@ export function createFsFake() {
         })
     }
 
-    const copySync: FilesystemOptionsFs['copySync'] = (src: string, dest: string) => {
+    const copySync: FilesystemOptionsFs['copySync'] = (_src: string, _dest: string) => {
         // implementation for copying files or directories
     }
 
-    const copy: FilesystemOptionsFs['copy'] = async (src: string, dest: string) => {
+    const copy: FilesystemOptionsFs['copy'] = async (_src: string, _dest: string) => {
         // implementation for copying files or directories
     }
 
@@ -156,12 +156,6 @@ export function createFsFake() {
     }
     const remove: FilesystemOptionsFs['remove'] = async (path: string) => {
         removeSync(path)
-    }
-
-    const removeAt: FilesystemOptionsFs['removeAt'] = async (filepath, milliseconds) => {
-        setTimeout(() => removeSync(filepath), milliseconds)
-
-        return true
     }
 
     return {
@@ -190,6 +184,5 @@ export function createFsFake() {
 
         remove,
         removeSync,
-        removeAt,
     }
 }

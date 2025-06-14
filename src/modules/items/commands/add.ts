@@ -1,5 +1,5 @@
 import { defineCommand } from '@/core/commander/defineCommand.js'
-import { filesystem, parsers, transforms } from '@/filesystem.js'
+import { filesystem, parsers } from '@/filesystem.js'
 import { checkbox } from '@inquirer/prompts'
 import { findManifest } from '@/utils/findManifest.js'
 import { readLabFile } from '@/utils/readItemFile.js'
