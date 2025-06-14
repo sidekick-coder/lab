@@ -18,8 +18,7 @@
         "access": "public"
     },
     "bin": {
-        ".": "./index.js",
-        "lab": "./index.js"
+        ".": "./index.js"
     },
     "scripts": {
         "lint": "eslint",
