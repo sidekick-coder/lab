@@ -1,0 +1,9 @@
+import { defineCommand } from '@lab/core/commander/index.js'
+
+export default defineCommand({
+    name: 'hello',
+    description: 'Prints Hello, World!',
+    async execute() {
+        console.log('Hello, World!')
+    },
+})

@@ -1,5 +1,5 @@
 import { defineCommand } from '@/core/commander/defineCommand.js'
-import { join, resolve } from 'path'
+import { join, resolve, dirname } from 'path'
 import fs from 'fs'
 import ejs from 'ejs'
 import { input } from '@inquirer/prompts'
@@ -53,14 +53,26 @@ export default defineCommand({
                     name,
                 },
             },
+            {
+                template: 'hello.js',
+                dest: join(pwd, 'commands', 'hello.mjs'),
+                data: {},
+            },
         ]
 
         for (const file of files) {
-            const content = renderTemplate(file.template, file.data)
-            const dest = file.dest
+            // Ensure the directory for the file exists
+            const dir = dirname(file.dest)
 
-            fs.writeFileSync(dest, content, 'utf-8')
-            console.log(`Created ${dest}`)
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true })
+            }
+
+            const content = renderTemplate(file.template, file.data)
+
+            fs.writeFileSync(file.dest, content, 'utf-8')
+
+            console.log(`Created ${file.dest}`)
         }
 
         console.log(`Initialized lab in ${pwd}`)
