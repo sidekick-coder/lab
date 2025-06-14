@@ -15,19 +15,12 @@ const args = []
 const NODE_OPTIONS = []
 const envVars = { ...process.env }
 
-function scriptPath(...args) {
-    const filename = path.resolve(import.meta.dirname, ...args)
-
-    return 'file://' + filename
-}
-
 args.push(
     isDev
         ? path.resolve(import.meta.dirname, 'src/index.ts')
         : path.resolve(import.meta.dirname, 'dist/index.js')
 )
 
-NODE_OPTIONS.push('--experimental-loader', scriptPath('loader.mjs'))
 NODE_OPTIONS.push('--disable-warning', 'ExperimentalWarning')
 
 if (isDev) {
