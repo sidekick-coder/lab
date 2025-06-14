@@ -1,0 +1,14 @@
+{
+    "extends": <%- tsconfig_lab_path %>,
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@lab/*": [
+                <%- lab_alias %>
+            ]
+        },
+        "types": [
+            <%- types_node %>
+        ]
+    }
+}

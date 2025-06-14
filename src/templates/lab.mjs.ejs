@@ -1,0 +1,18 @@
+import { createCommander } from '@lab/core/commander/index.js'
+import { defineLab } from '@lab/utils/index.js'
+import { resolve } from 'path'
+
+const name = '<%= name %>'
+
+export default defineLab({
+    name,
+    setup(lab) {
+        const commander = createCommander({
+            bin: `${lab.commander.bin} ${name}`,
+        })
+
+        commander.addFolder(resolve(import.meta.dirname, './commands'))
+
+        lab.commander.addSubCommander(name, commander)
+    },
+})

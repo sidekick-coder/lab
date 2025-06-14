@@ -1,4 +1,4 @@
-import { createCommander, createCommanderHelp } from '@/core/commander/index.js'
+import { createCommander } from '@/core/commander/index.js'
 import fs from 'fs'
 import files from './modules/files/index.js'
 import sources from './modules/sources/index.js'
@@ -22,7 +22,7 @@ async function main() {
         defaultCommand: 'help',
     })
 
-    commander.add(createCommanderHelp(commander))
+    commander.addFolder(resolve(import.meta.dirname, 'commands'))
 
     const labs = [config]
 
@@ -47,14 +47,14 @@ async function main() {
         const exists = fs.existsSync(lab)
 
         if (!exists) {
-            console.warn(`Lab module "${lab}" does not exist. Skipping...`)
+            console.warn(`[lab] lab module "${lab}" does not exist. Skipping...`)
             continue
         }
 
         const [error, labModule] = await tryCatch(() => import(lab))
 
         if (error) {
-            console.error(`Failed to load lab module "${lab}":`, error)
+            console.error(`[lab] Failed to load lab module "${lab}":`, error)
             continue
         }
 
@@ -68,7 +68,7 @@ async function main() {
         )
 
         if (error) {
-            console.error('Failed to load local lab module:', error)
+            console.error('[lab] Failed to load local lab module:', error)
         }
 
         if (!error && pwdLab.default) {
