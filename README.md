@@ -40,7 +40,11 @@ To make it easier to use, you can set up a shell alias. Add the following to you
 
 ### Bash/Zsh
 ```sh
+# npx
 alias lab="npx @sidekick-coder/lab"
+
+# global install 
+alias lab="node $(npm root -g)/@sidekick-coder/lab/index.js"
 ```
 
 ### PowerShell
