@@ -25,8 +25,6 @@ export default defineConfig({
             alias[`@/${folder}`] = resolve('dist', folder)
         }
 
-        console.log(alias)
-
         for (const file of files.reverse()) {
             const folder = dirname(file)
             let content = await fs.promises.readFile(file, 'utf-8')
