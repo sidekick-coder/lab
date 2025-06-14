@@ -1,7 +1,7 @@
 {
     "name": "@sidekick-coder/lab",
     "description": "Helper cli to import/download scripts from github repositories.",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "type": "module",
     "keywords": [
         "cli",
