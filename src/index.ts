@@ -51,7 +51,7 @@ async function main() {
             continue
         }
 
-        const [error, labModule] = await tryCatch(() => import(lab))
+        const [error, labModule] = await tryCatch(() => importModule(lab))
 
         if (error) {
             console.error(`[lab] Failed to load lab module "${lab}":`, error)
