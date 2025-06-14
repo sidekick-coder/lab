@@ -2,3 +2,4 @@
 
 export * from './importAll.js'
 export * from './tryCatch.js'
+export * from './defineModule.js'

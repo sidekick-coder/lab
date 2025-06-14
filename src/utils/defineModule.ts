@@ -12,3 +12,5 @@ interface DefineModule {
 export function defineModule(module: DefineModule) {
     return module
 }
+
+export const defineLab = defineModule
