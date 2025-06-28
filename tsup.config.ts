@@ -39,5 +39,15 @@ export default defineConfig({
 
             await fs.promises.writeFile(file, content)
         }
+
+        // resources
+        const resources = await fs.promises.readdir(resolve(import.meta.dirname, 'src/templates'))
+
+        for (const r of resources) {
+            await fs.promises.cp(
+                resolve(import.meta.dirname, 'src/templates', r),
+                resolve(import.meta.dirname, 'dist/templates', r)
+            )
+        }
     },
 })
