@@ -10,3 +10,4 @@ docs
 .env
 # include
 !dist
+!src
